@@ -9,13 +9,20 @@ def NOR(a, b):
     return False
 
 
+def get_generation(prompts_):
+    co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
+    for prompt_ in prompts_:
+        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.9, k=10)
+        print("Completed paragraph")
+
+
 if __name__ == "__main__":
     paragraphs = get_pdf_paragraphs("https://arxiv.org/pdf/2210.06929.pdf")
 
     to_rem = []
 
     for p in paragraphs:
-        if p != (re.match()):
+        if p != p:
             to_rem.append(p)
             continue
         if (len(p) < 100) and (NOR(p != paragraphs[0], p != paragraphs[1])) or p[0].islower():
@@ -27,14 +34,10 @@ if __name__ == "__main__":
     for r in to_rem:
         paragraphs.remove(r)
 
-    co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
     prompt = "Summarize the following passage for a presentation: \n ${fPassage} \n\n  Summary:"
-    responses = []
-    for p in paragraphs:
-        stopsequences = ['\n\n', '\t']
-        response = co.generate(prompt=prompt.format(fPassage=p), max_tokens=150, temperature=0.9, k=10)
-        responses.append(response)
-        print("Completed paragraph")
+    print(len(paragraphs))
+    prompts = [prompt.format(fPassage=p) for p in paragraphs[:3]]
+    responses = list(get_generation(prompts))
 
     for e in responses:
-        print(e.generations[0].text)
+        print("START:\n", e.generations[0].text)
