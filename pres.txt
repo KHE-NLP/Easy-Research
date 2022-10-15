@@ -1,0 +1,6 @@
+Our project is a program that converts a pdf of an article into a presentation on the article.
+The project uses CoHere to generate summaries from the pdf data and these summaries are made into a presentation.
+
+How to make an AI that converts PDFs into presentations:
+1. Get the text from the PDF
+2. Use Cohere to generate summaries from the PDF

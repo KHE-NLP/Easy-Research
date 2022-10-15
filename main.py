@@ -10,7 +10,7 @@ class ContinueServer(BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
         self.wfile.write(b"<form method=\"POST\" action=\"/continue\">")
-        self.wfile.write(b"<input name=\"start\" />")
+        self.wfile.write(b"<textarea name=\"start\" />")
         self.wfile.write(b"</form>")
 
     def do_POST(self):
