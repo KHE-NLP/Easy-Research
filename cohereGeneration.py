@@ -1,14 +1,29 @@
+def NOR(a, b):
+	if a == 0 and b == 0:
+		return True
+	return False
+
+
 import cohere
+import re
 from parsers import get_pdf_paragraphs
 
 paragraphs = get_pdf_paragraphs("https://arxiv.org/pdf/2210.06929.pdf")
 
-
 to_rem = []
 
 for p in paragraphs:
-	if((paragraphs.count(p)>1) or (p[0] == "[") or (len(p)<20)):
-		to.remove(p)
+	if((p != (re.match()))):
+		to_rem.append(p)
+		continue
+	if ((len(p)<100) and (NOR(p != paragraphs[0], p != paragraphs[1])) or p[0].islower()):
+		to_rem.append(p)
+		continue
+	if(p.find("Fig.")!=-1 or p.find("doi.org")!=-1):
+		to_rem.append(p)
+
+for r in to_rem:
+	paragraphs.remove(r)
 	
 
 	
