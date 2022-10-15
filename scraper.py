@@ -25,4 +25,7 @@ if __name__ == "__main__":
         if "abs" in urls[0]:
             urls[0] = urls[0].replace("abs", "pdf")
 
+        if "pdf" not in urls[0]:
+            continue
+
         print(urls)
