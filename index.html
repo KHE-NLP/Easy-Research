@@ -1,23 +1,25 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap 4.0.0 CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="styles.css">
 
     <title>title</title>
-  </head>
-  <body>
+</head>
+
+<body>
 
     <div class="container">
         <div class="row">
             <div class="col-12">
                 <div class="card my-5 px-4 border text-center">
-
                     <!--Icon and Title-->
                     <div class="row no-gutters py-2">
                         <div class="col-12">
@@ -35,9 +37,9 @@
                                 <p class="py-2">
                                     (App) is an AI that creates PowerPoint presentations with
                                     summaries of user-uploaded academic articles that users can then
-                                    download for personal use. (App) will source the paper directly and 
+                                    download for personal use. (App) will source the paper directly and
                                     does not condone submitting the work as one's own. Generated PowerPoints
-                                    are to be used only for personal use to aid in understanding and sharing 
+                                    are to be used only for personal use to aid in understanding and sharing
                                     academic articles.
                                 </p>
                                 <p>
@@ -50,19 +52,37 @@
                     <!--Form for Submitting PDF File-->
                     <div class="row no-gutters">
                         <div class="col-12 pt-2 pb-4">
-                            <form action="submit_.php">
-                                <div class="row no-gutter pb-2">
-                                    <div class="col-12">
+                            <div class="row no-gutter pb-2">
+                                <div class="col-12">
+                                    <form action="submit_url.php">
                                         <label for="filePDF">Article PDF File:</label>
-                                        <input type="file" id="filePDF" name="upload">
-                                    </div>
+                                        <input type="file" id="filePDF" name="uploadPDF">
+                                        <input id="submitPDF" type="submit" value="Submit">
+                                    </form>
                                 </div>
-                                <div class="row no-gutter">
-                                    <div class="col-12">
-                                        <input id="submit" type="submit" value="Submit">
-                                    </div>
+                                <div class="col-12">
+                                    <p>--or--</p>
                                 </div>
-                            </form>
+                                <div class="col-12">
+                                    <form action="submit_pdf.php">
+                                        <label for="urlPDF">Article PDF Location:</label>
+                                        <input type="text" id="urlPDF" name="locatePDF">
+                                        <input id="submitURL" type="submit" value="Submit">
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="row no-gutter">
+                                <div class="col-12">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row no-gutters">
+                        <div class="col-12">
+                            <div id="loader" class="hidden card border-0 pb-4">
+                                <!--loader will go here-->
+                                test
+                            </div>
                         </div>
                     </div>
 
@@ -71,9 +91,17 @@
         </div>
     </div>
 
+    <script src="script.js"></script>
     <!-- jQuery, Popper.js, Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-  </body>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
 </html>
