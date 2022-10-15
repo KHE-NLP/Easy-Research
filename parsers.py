@@ -45,8 +45,8 @@ def get_pptx_slides(pptx_data, ask_desc=True):
 
 
 if __name__ == "__main__":
-    # pdf = get_pdf_paragraphs('http://faculty.cs.tamu.edu/stoleru/papers/won12re2mr.pdf')
-    # print(*pdf, sep="\nPAR:\n")
-    pptx = get_pptx_slides(
-        "http://antares.cs.kent.edu/~seminar/Presentations/Minimum-Latency%20Broadcast%20Scheduling%20in%20Wireless%20Ad%20Hoc%20Networks.pptx")
-    print(*pptx, sep="\n")
+    pdf = get_pdf_paragraphs('http://faculty.cs.tamu.edu/stoleru/papers/won12re2mr.pdf')
+    print(*pdf, sep="\nPAR:\n")
+    #pptx = get_pptx_slides(
+    #    "http://antares.cs.kent.edu/~seminar/Presentations/Minimum-Latency%20Broadcast%20Scheduling%20in%20Wireless%20Ad%20Hoc%20Networks.pptx")
+    #print(*pptx, sep="\n")
