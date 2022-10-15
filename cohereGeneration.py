@@ -11,7 +11,7 @@ def cleanData(paragraphs):
 	to_rem = []
 	emailPattern = r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
 	urlPattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
-	citationPattern = r'(\[\0-9{1,256}\])'
+	citationPattern = r'(\[[0-9]{1,4}\] ([^\.\?\!]*)[\.\?\!] ([0-9]{4}))'
 	
 	for p in paragraphs:
 		if ((len(p)<100) and (NOR(p != paragraphs[0], p != paragraphs[1]))):
