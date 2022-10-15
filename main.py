@@ -35,7 +35,7 @@ class ContinueServer(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = HTTPServer(("", 1234), ContinueServer)
+    server = HTTPServer(("", 12345), ContinueServer)
 
     try:
         server.serve_forever()
