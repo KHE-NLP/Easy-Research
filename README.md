@@ -1,0 +1,1 @@
+An AI that creates summaries of academic articles as presentations.
