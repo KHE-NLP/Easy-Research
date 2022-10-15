@@ -7,4 +7,4 @@ Summary of how the project works:
   - Python code pulls from database and creates powerpoints
   - Powerpoint can be downloaded from web app
   
-  The app will source the paper directly and does not condone submitting the work as ones owm. It should only be used for understanding and sharing 
+  The app will source the paper directly and does not condone submitting the work as ones own. It should only be used for understanding and sharing.
