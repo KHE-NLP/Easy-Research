@@ -32,17 +32,23 @@ def cleanData(paragraphs):
 	for r in to_rem:
 		paragraphs.remove(r)
 	return paragraphs
-		
 
-paragraphs = get_pdf_paragraphs("https://arxiv.org/pdf/2210.06929.pdf")
+def get_generation(prompts_):
+    co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
+    for prompt_ in prompts_:
+        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.9, k=10)
+        print("Completed paragraph")
 
 
-cleanData(paragraphs)
+if __name__ == "__main__":
+    paragraphs = get_pdf_paragraphs("https://arxiv.org/pdf/2210.06929.pdf")
+    
+    paragraphs = cleanData(paragraphs)
+    
+    prompt = "Summarize the following passage for a presentation: \n ${fPassage} \n\n  Summary:"
+    print(len(paragraphs))
+    prompts = [prompt.format(fPassage=p) for p in paragraphs[:3]]
+    responses = list(get_generation(prompts))
 
-
-co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
-responses = "Format: Title:, Author(s): Summarize the following passage for a presentation: \n ${} \n\n  Summary:"
-
-stopsequences = ['\n\n', '\t']
-response = co.generate(prompt=responses[0], max_tokens=150, temperature=0.9, k=10)
-print(response.generations[0].text)
+    for e in responses:
+        print("START:\n", e.generations[0].text)
