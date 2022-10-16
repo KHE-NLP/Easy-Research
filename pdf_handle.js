@@ -32,7 +32,7 @@ function uploadUrl() {
     formData.append("data", data);
 
     $.ajax({
-       url: "http://147.182.183.30:12345/pdffile",
+       url: "http://147.182.183.30:12345/pdflink",
        type: "POST",
        data: formData,
        processData: false,
