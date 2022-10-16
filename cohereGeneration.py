@@ -10,7 +10,6 @@ def NOR(a, b):
         return False
     return True
 
-
 def removeFromList(paragraphs_, removals):
     for r in removals:
         paragraphs_.remove(r)
@@ -25,14 +24,14 @@ def removeNonAscii(paragraphs_):
 
 
 def removeFiguresAndTables(paragraphs_):
-    figurePattern = r'(^Fi\w+[\.]*[\.\s]*[0-9]+):\s'
-    figurePatternWhiteSpace = r'\s(^Fi\w+[\.]*[\.\s]*[0-9]+):\s'
-    tablePattern = r'(^Ta\w+[\.]*[\.\s]*[0-9]+):\s'
-    tablePatternWhiteSpace = r'\s(^Ta\w+[\.]*[\.\s]*[0-9]+):\s'
-    figureDashPattern = r'(^Fi\w+[\.]*[\.\s]*[0-9]+)-\s'
-    figureDashWhiteSpace = r'\s(^Fi\w+[\.]*[\.\s]*[0-9]+)-\s'
-    tableDashPattern = r'(^Ta\w+[\.]*[\.\s]*[0-9]+)-\s'
-    tableDashWhiteSpace = r'\s(^Ta\w+[\.]*[\.\s]*[0-9]+)-\s'
+    figurePattern = r'(^Fi\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    figurePatternWhiteSpace = r'\s(^Fi\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    tablePattern = r'(^Ta\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    tablePatternWhiteSpace = r'\s(^Ta\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    figureDashPattern = r'(^Fi\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+    figureDashWhiteSpace = r'\s(^Fi\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+    tableDashPattern = r'(^Ta\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+    tableDashWhiteSpace = r'\s(^Ta\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
     to_rem = []
     for p in paragraphs_:
         if re.search(figurePattern, p) or re.search(figurePatternWhiteSpace, p):
@@ -52,7 +51,8 @@ def removeFiguresAndTables(paragraphs_):
 
 def removeUrls(paragraphs_):
     egiePattern = r'(\w(?=\.))(\.(?=\w))(\w(?=\.))(\.(?=[\b\s.,!?:;]))'
-    urlPattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+
+    urlPattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,75}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
     to_rem = []
     for p in paragraphs_:
         if re.search(urlPattern, p) and not re.search(egiePattern, p):
@@ -61,7 +61,7 @@ def removeUrls(paragraphs_):
 
 
 def removeArxiv(paragraphs_):
-    arXivPattern = r'(ar[xX]iv):([0-9]{1,6}).([0-9]{1-6})'
+    arXivPattern = r'(ar[xX]iv):([0-9]+).([0-9]+)'
     to_rem = []
     for p in paragraphs_:
         if re.search(arXivPattern, p):
@@ -73,7 +73,6 @@ def removeEmails(paragraphs_):
     emailPattern = r'([A-Za-z0-9.-_]){,64}@[A-Za-z0-9]+(\.[A-Z|a-z]{2,})+'
     to_rem = []
     for p in paragraphs_:
-        #print(p, end="\n\n")
         if re.search(emailPattern, p):
             to_rem.append(p)
     removeFromList(paragraphs_, to_rem)
@@ -91,7 +90,7 @@ def removeCitations(paragraphs_):
     citationPattern = r'(\[[0-9]{1,4}\]\s)*(([^\.\?\!]*)[\.\?\!])(\s)([0-9]{4}.)\s(\w+)'
     to_rem = []
     for p in paragraphs_:
-        if re.search(citationPattern, p):
+        if re.search(citationPattern, p) or p[0] == "[":
             to_rem.append(p)
     removeFromList(paragraphs_, to_rem)
 
@@ -136,7 +135,6 @@ def mergeContinuations(paragraphs_):
 
 
     paragraphs_ = newParagraphs
-
 
 def get_generation(prompts_):
     co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
