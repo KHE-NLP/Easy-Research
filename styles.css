@@ -18,15 +18,3 @@ body {
 #icon {
     max-height: 100px;
 }
-
-#bar {
-    background-color: grey;
-    height: 30px;
-    width: 100%;
-}
-
-#progress {
-    background-color: rgb(243, 57, 57);
-    height: 30px;
-    width: 1%;
-}
