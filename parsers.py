@@ -13,12 +13,12 @@ def get_pdf_text(pdf_data):
         resp_bytes = io.BytesIO(resp.content)
         data = extract_text(resp_bytes)
     else:
-        data = open(pdf_data).read()
+        data = extract_text(pdf_data)
     return data
 
 
-def get_pdf_paragraphs(pdf_data, min_par=40):
-    data = get_pdf_text(pdf_data).split("\n\n")
+def get_paragraphs(data, min_par=40):
+    data = data.split("\n\n")
     to_rem = []
     for i in data:
         if len(i) < min_par:
@@ -32,12 +32,30 @@ def get_pptx_slides(pptx_data, ask_desc=True):
     if pptx_data[:8] == "https://" or pptx_data[:7] == "http://":
         resp = requests.get(pptx_data)
         resp_bytes = io.BytesIO(resp.content)
-        ppt = Presentation(resp_bytes)
+        ppt_ = Presentation(resp_bytes)
     else:
-        ppt = Presentation(pptx_data)
+        ppt_ = Presentation(pptx_data)
 
     slides = []
-    for slide in ppt.slides:
+    for slide in ppt_.slides:
+        slide_text = ""
+        for shape in slide.shapes:
+            if hasattr(shape, "text"):
+                slide_text += shape.text + "\n"
+            if hasattr(shape, "image"):
+                if ask_desc:
+                    Image.open(io.BytesIO(shape.image.blob)).show()
+                    desc = input("What is this? >")
+                    slide_text += "[IMAGE " + desc + "]"
+        slides.append(slide_text)
+    return slides
+
+
+def get_pptx_slides_raw(pptx_data, ask_desc=True):
+    ppt_ = Presentation(io.BytesIO(pptx_data))
+
+    slides = []
+    for slide in ppt_.slides:
         slide_text = ""
         for shape in slide.shapes:
             if hasattr(shape, "text"):

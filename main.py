@@ -1,7 +1,10 @@
-import urllib
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import io
 import urllib.parse
-from cohereGeneration import get_generation
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from cohereGeneration import get_generation, cleanData
+from pdfminer.high_level import extract_text
+
+from parsers import get_paragraphs, make_pptx_slides
 
 
 class ContinueServer(BaseHTTPRequestHandler):
@@ -9,8 +12,8 @@ class ContinueServer(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(b"<form method=\"POST\" action=\"/continue\">")
-        self.wfile.write(b"<textarea name=\"start\" ></textarea>")
+        self.wfile.write(b"<form method=\"POST\" action=\"/pdffile\">")
+        self.wfile.write(b"<input type=\"file\" name=\"data\" />")
         self.wfile.write(b"<button name=\"submit\">Submit</button>")
         self.wfile.write(b"</form>")
 
@@ -20,14 +23,27 @@ class ContinueServer(BaseHTTPRequestHandler):
         if line[:9] == "/continue":
             content_length = int(self.headers['Content-Length'])
             line = self.rfile.read(content_length)
-            line = line.split(b"&")[0].split(b"=")[1]
-            line = line.replace(b"+", b" ")
+            line = urllib.parse.parse_qs(line)
             print(line)
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            end = list(get_generation([line.decode("ascii")]))
-            self.wfile.write(line + bytes(end[0].generations[0].text, "utf-8"))
+            end = list(get_generation([line[b"start"][0].decode()]))
+            self.wfile.write(line[b"start"][0] + bytes(end[0].generations[0].text, "utf-8"))
+        if line[:8] == "/pdffile":
+            content_length = int(self.headers['Content-Length'])
+            line = self.rfile.read(content_length)
+            line = urllib.parse.parse_qs(line)
+            print(line[b"data"])
+            text = get_paragraphs(extract_text(io.BytesIO(line[b"data"][0])))
+            cleanData(text)
+            summs = list(get_generation(text, "summary_generator"))
+            titles = list(get_generation(summs, "summary_title"))
+            ppt = make_pptx_slides([titles[i] + "\n" + summs[i] for i in range(len(titles))])
+            self.send_response(200)
+            self.send_header("Content-type", "*/*")
+            self.end_headers()
+            ppt.save(self.wfile)
         else:
             self.send_response(400)
             self.send_header("Content-type", "text/html")

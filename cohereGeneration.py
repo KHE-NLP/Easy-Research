@@ -1,6 +1,6 @@
 import cohere
 import re
-from parsers import get_pdf_paragraphs
+from parsers import get_paragraphs, get_pdf_text
 import string
 
 
@@ -134,21 +134,28 @@ def mergeContinuations(paragraphs_):
         else:
             newParagraphs.append(paragraphs_[i])
 
-
     paragraphs_ = newParagraphs
 
 
-def get_generation(prompts_):
+models = {
+    "paragraph_classifier": "0e3f7368-f1f7-493a-98f4-c1dd90f01c36-ft",
+    "summary_generator": "b5b3f2e6-bc7e-4442-a4e9-5298ef15195f-ft",
+    "summary_title": "9e0c4590-c121-447a-b271-5d5c0684925a-ft",
+    "default": "xlarge"
+}
+
+
+def get_generation(prompts_, model="default"):
     co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
     for prompt_ in prompts_:
-        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.5,
+        yield co.generate(prompt=prompt_, model=models[model], max_tokens=150, temperature=0.5,
                           k=10, stop_sequences=["Passage:"], num_generations=3,
                           presence_penalty=0.2)
         print("Completed paragraph")
 
 
 if __name__ == "__main__":
-    paragraphs = get_pdf_paragraphs("https://arxiv.org/pdf/2210.07024.pdf")
+    paragraphs = get_paragraphs(get_pdf_text("https://arxiv.org/pdf/2210.07024.pdf"))
 
     cleanData(paragraphs)
 
@@ -201,7 +208,7 @@ for sampling A(cid:48) rules before training the consequent estimator. See Appen
 Summary:
 The time complexity of the training is linear with respect to A, which is pretty good.
 """
-    
+
     prompt = "Passage: \n {fPassage} \n\n  Summary:"
     print(len(paragraphs))
     prompts = [prompt.format(fPassage=p) for p in paragraphs[3:4]]
