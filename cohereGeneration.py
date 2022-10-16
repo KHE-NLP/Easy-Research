@@ -30,6 +30,7 @@ def removeFiguresAndTables(paragraphs_):
     figureDashWhiteSpace = r'\s(^Fi\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
     tableDashPattern = r'(^Ta\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
     tableDashWhiteSpace = r'\s(^Ta\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+    to_rem = []
     for p in paragraphs_:
         if re.search(figurePattern, p) or re.search(figurePatternWhiteSpace, p):
             to_rem.append(p)
