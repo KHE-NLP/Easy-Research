@@ -1,6 +1,8 @@
 import http.client
 import zipfile
 
+import pptx
+
 from parsers import get_pptx_slides
 
 base = "antares.cs.kent.edu"
@@ -33,7 +35,7 @@ if __name__ == "__main__":
 
         try:
             slides = get_pptx_slides(urls[1], ask_desc=False)
-        except zipfile.BadZipFile:
+        except (zipfile.BadZipFile):
             continue
 
         for slide in slides:
@@ -41,7 +43,7 @@ if __name__ == "__main__":
                 continue
             title = slide.split("\n")[0]
             lines = "\n".join(slide.split("\n")[1:])
-            fl.write("SUMMARY:\n")
             fl.write(lines + "\n")
             fl.write("TITLE:\n")
             fl.write(title + "\n")
+            fl.write("--SEP--\n")

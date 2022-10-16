@@ -9,6 +9,7 @@ def NOR(a, b):
         return False
     return True
 
+
 def removeFromList(paragraphs_, removals):
     for r in removals:
         paragraphs_.remove(r)
@@ -120,14 +121,15 @@ def cleanData(paragraphs_):
     removeEmails(paragraphs_)
     mergeContinuations(paragraphs_)
 
+
 def mergeContinuations(paragraphs_):
-    puncuation = string.punctuation + string.whitespace
+    punctuation = string.punctuation + string.whitespace
     newParagraphs = []
 
     for i in range(len(paragraphs_)):
-        #print(i, ord(paragraphs_[i][0]))
-        if (paragraphs_[i][0].islower() or ( paragraphs_[i][0] in puncuation ) and ( i != 0 )):
-            #paragraphs_[i-1 : i] = [''.join(paragraphs_[i-1 : i])]
+        # print(i, ord(paragraphs_[i][0]))
+        if paragraphs_[i][0].islower() or (paragraphs_[i][0] in punctuation) and (i != 0):
+            # paragraphs_[i-1 : i] = [''.join(paragraphs_[i-1 : i])]
             newParagraphs[-1] = newParagraphs[-1] + paragraphs_[i]
         else:
             newParagraphs.append(paragraphs_[i])
@@ -135,12 +137,13 @@ def mergeContinuations(paragraphs_):
 
     paragraphs_ = newParagraphs
 
+
 def get_generation(prompts_):
     co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
     for prompt_ in prompts_:
-        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.5, 
-						  k=10, stop_sequences=["Passage:"], num_generations=3,
-						  presence_penalty=0.2)
+        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.5,
+                          k=10, stop_sequences=["Passage:"], num_generations=3,
+                          presence_penalty=0.2)
         print("Completed paragraph")
 
 
@@ -198,11 +201,11 @@ for sampling A(cid:48) rules before training the consequent estimator. See Appen
 Summary:
 The time complexity of the training is linear with respect to A, which is pretty good.
 """
-    responses = []
-    print(len(paragraphs))		   
-    prompt = "Passage: \n {fPassage} \n\n  Summary:"		   
-    prompts = [prompt.format(fPassage=p) for p in paragraphs]
-    prompts_with_prefix = [prefix + p for p in prompts]		
+    
+    prompt = "Passage: \n {fPassage} \n\n  Summary:"
+    print(len(paragraphs))
+    prompts = [prompt.format(fPassage=p) for p in paragraphs[3:4]]
+    prompts_with_prefix = [prefix + p for p in prompts]
     responses = list(get_generation(prompts_with_prefix))
 
     for p, e in zip(prompts, responses):

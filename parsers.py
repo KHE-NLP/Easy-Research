@@ -8,7 +8,7 @@ from PIL import Image
 
 
 def get_pdf_text(pdf_data):
-    if pdf_data[:8] == "https://":
+    if pdf_data[:8] == "https://" or pdf_data[:7] == "http://":
         resp = requests.get(pdf_data)
         resp_bytes = io.BytesIO(resp.content)
         data = extract_text(resp_bytes)
@@ -29,7 +29,7 @@ def get_pdf_paragraphs(pdf_data, min_par=40):
 
 
 def get_pptx_slides(pptx_data, ask_desc=True):
-    if pptx_data[:8] == "https://":
+    if pptx_data[:8] == "https://" or pptx_data[:7] == "http://":
         resp = requests.get(pptx_data)
         resp_bytes = io.BytesIO(resp.content)
         ppt = Presentation(resp_bytes)
@@ -74,7 +74,7 @@ def make_pptx_slides(pptx_strings):
                 a = tline[-1]
                 tline.remove(a)
                 tline += slice_well(a, 65)
-                #print(tline[-1])
+                # print(tline[-1])
             new_lines += tline
         text = "\n".join(new_lines)
         slide.shapes.title.text = title
