@@ -49,7 +49,7 @@ class ContinueServer(BaseHTTPRequestHandler):
             line = self.rfile.read(content_length)
             line = line.split(b"\r\n")[3]
             print(line)
-            text = get_paragraphs(get_pdf_text(line))
+            text = get_paragraphs(get_pdf_text(line.decode()))
             cleanData(text)
             summs = list(get_generation(text, "summary_generator"))
             titles = list(get_generation(summs, "summary_title"))
