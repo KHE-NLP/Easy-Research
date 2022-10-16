@@ -123,7 +123,7 @@ def cleanData(paragraphs_):
 def get_generation(prompts_):
     co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
     for prompt_ in prompts_:
-        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.9, k=10)
+        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.9, k=10, stop_sequences=["Passage:"])
         print("Completed paragraph")
 
 
@@ -132,10 +132,62 @@ if __name__ == "__main__":
 
     cleanData(paragraphs)
 
-    prompt = "Summarize the following passage for a presentation: \n ${fPassage} \n\n  Summary:"
-    print(len(paragraphs))
-    prompts = [prompt.format(fPassage=p) for p in paragraphs[:3]]
-    responses = list(get_generation(prompts))
+    prefix = """Passage:
+    We present SELOR, a framework for integrating self-explaining capabilities into a
+given deep model to achieve both high prediction performance and human precision.
+By “human precision”, we refer to the degree to which humans agree with the
+reasons models provide for their predictions. Human precision affects user trust and
+allows users to collaborate closely with the model. We demonstrate that logic rule
+explanations naturally satisfy human precision with the expressive power required
+for good predictive performance. We then illustrate how to enable a deep model
+to predict and explain with logic rules. Our method does not require predeﬁned
+logic rule sets or human annotations and can be learned efﬁciently and easily with
+widely-used deep learning modules in a differentiable way. Extensive experiments
+show that our method gives explanations closer to human decision logic than other
+methods while maintaining the performance of deep learning models.
 
-    for e in responses:
-        print("START:\n", e.generations[0].text)
+Summary:
+SELOR is a framework to give predictions that are similar to what a human would give.
+It does this while still using deep learning, which allows it to adapt.
+
+Passage:
+Datasets. We conduct experiments on three datasets. The ﬁrst two are textual, and the third is tabular.
+Yelp classiﬁes reviews of local businesses into positive or negative sentiment [44], and Clickbait
+News Detection from Kaggle labels whether a news article is a clickbait [45]. Adult from the UCI
+machine learning repository [46], is an imbalanced tabular dataset that provides labels about whether
+the annual income of an adult is more than $50K/yr or not. For Yelp, we use a down-sampled subset
+(10%) for training, as per existing work [39]. More details about the datasets are in Appendix C.1.
+
+Summary:
+The article used datasets from Yelp, Clickbait News Detection, and a dataset of annual incomes.
+
+Passage:
+Complexity analysis. Time complexity is com-
+pared in Table 1. The complexity for antecedent
+generation corresponds to the time added for
+generating the antecedents during model training
+compared to the time required for training the
+base deep model f . Here, N is the number of
+training samples, and C is the time complexity
+for computing the consequent of each antecedent.
+As shown in the table, removing the recursive
+antecedent generator (RG) or the neural conse-
+quent estimator (NE) brings an additional linear
+complexity with the number of feasible antecedents A, which is much larger than A(cid:48). For example,
+in our experiment, setting A(cid:48) to 104 is good enough to train an accurate neural consequent estimator,
+while the number of all possible antecedents is A = 6.25 × 1012. Here, we do not include the analysis
+for sampling A(cid:48) rules before training the consequent estimator. See Appendix B.4 for more details.
+
+Summary:
+The time complexity of the training is linear with respect to A, which is pretty good.
+"""
+    
+    prompt = "Passage: \n {fPassage} \n\n  Summary:"
+    print(len(paragraphs))
+    prompts = [prompt.format(fPassage=p) for p in paragraphs[12:13]]
+    prompts_with_prefix = [prefix + p for p in prompts]
+    responses = list(get_generation(prompts_with_prefix))
+
+    for p, e in zip(prompts, responses):
+        print("REAL:\n", p)
+        print("SUMM:\n", e.generations[0].text)
