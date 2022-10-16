@@ -10,6 +10,7 @@ function uploadFile() {
        processData: false,
        contentType: false,
        success: function(response) {
+            resp = atob(response)
             let blob = new Blob([response], { type: "*/*" });
 
             let a = document.createElement('a');
@@ -38,6 +39,7 @@ function uploadUrl() {
        processData: false,
        contentType: false,
        success: function(response) {
+            resp = atob(response)
             let blob = new Blob([response], { type: "*/*" });
 
             let a = document.createElement('a');

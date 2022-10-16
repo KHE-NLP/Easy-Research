@@ -1,4 +1,6 @@
+import base64
 import io
+import os
 import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from cohereGeneration import get_generation, cleanData
@@ -12,10 +14,44 @@ class ContinueServer(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(b"<form method=\"POST\" action=\"/pdffile\">")
-        self.wfile.write(b"<input type=\"file\" name=\"data\" />")
-        self.wfile.write(b"<button name=\"submit\">Submit</button>")
-        self.wfile.write(b"</form>")
+        #self.wfile.write(b"<form method=\"POST\" action=\"/pdflink\">")
+        #self.wfile.write(b"<input type=\"file\" name=\"data\" />")
+        self.wfile.write(b"<textarea id=\"urlPDF\" name=\"data\" ></textarea>")
+        self.wfile.write(b"<button name=\"submit\" onclick=\"uploadUrl()\">Submit</button>")
+        #self.wfile.write(b"</form>")
+        self.wfile.write(b"""<script>
+        function uploadUrl() {
+    var data = $('#urlPDF')[0].value;
+    var formData = new FormData();
+    formData.append("data", data);
+
+    $.ajax({
+       url: "http://127.0.0.1:12345/pdflink",
+       type: "POST",
+       data: formData,
+       processData: false,
+       contentType: false,
+       success: function(response) {
+            resp = atob(response)
+            let blob = new Blob([resp], { type: "*/*" });
+
+            let a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.download = "flashread.pptx";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.removeObjectURL(a.href);
+       },
+       error: function(jqXHR, textStatus, errorMessage) {
+           console.log(errorMessage);
+       }
+    });
+}
+        </script>""")
+        self.wfile.write(b"""<script src="https://code.jquery.com/jquery-3.6.1.min.js"
+            integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+            crossorigin="anonymous"></script>""")
 
     def do_POST(self):
         line = self.path
@@ -43,15 +79,19 @@ class ContinueServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "*/*")
             self.end_headers()
-            ppt.save(self.wfile)
+            #ppt.save("test.pptx")
+            b = bytes()
+            ppt.save(io.BytesIO(b))
+            print(b)
+            self.wfile.write(base64.b64encode(b))
         elif line[:8] == "/pdflink":
             content_length = int(self.headers['Content-Length'])
             line = self.rfile.read(content_length)
-            line = line.split(b"\r\n")[3]
+            line = line.replace(b"\r", b"").split(b"\n")[3]
             print(line)
             text = get_paragraphs(get_pdf_text(line.decode()))
             cleanData(text)
-            summs = list(e.generations[-1].text for e in get_generation(text[:2], "summary_generator"))
+            summs = list(e.generations[-1].text for e in get_generation(text[1:2], "summary_generator"))
             print("Summaries done")
             titles = list(e.generations[-1].text for e in get_generation(summs, "summary_title"))
             print("titles done")
@@ -61,9 +101,14 @@ class ContinueServer(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Access-Control-Allow-Methods", "*")
             self.end_headers()
-            filename = os.path.join(application.root_path, 'test.pptx')
-            prs.save(filename)
-            return send_file(filename_or_fp=filename)
+            #ppt.save("test.pptx")
+            #ppt.save(self.wfile)
+            #filename = os.path.join(application.root_path, 'test.pptx')
+            #prs.save(filename)
+            #return send_file(filename_or_fp=filename)
+            bio = io.BytesIO(bytes())
+            ppt.save(bio)
+            self.wfile.write(base64.b64encode(bio.getvalue()))
         else:
             self.send_response(400)
             self.send_header("Content-type", "text/html")
