@@ -68,9 +68,10 @@ def removeArxiv(paragraphs_):
 
 
 def removeEmails(paragraphs_):
-    emailPattern = r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
+    emailPattern = r'([A-Za-z0-9.-_]){,64}@[A-Za-z0-9]+(\.[A-Z|a-z]{2,})+'
     to_rem = []
     for p in paragraphs_:
+        #print(p, end="\n\n")
         if re.search(emailPattern, p):
             to_rem.append(p)
     removeFromList(paragraphs_, to_rem)
