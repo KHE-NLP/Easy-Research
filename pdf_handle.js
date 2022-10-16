@@ -27,7 +27,7 @@ function uploadFile() {
 }
 
 function uploadUrl() {
-    var data = $('#urlPDF')[0].text;
+    var data = $('#urlPDF')[0].value;
     var formData = new FormData();
     formData.append("data", data);
 
