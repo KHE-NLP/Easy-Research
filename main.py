@@ -61,7 +61,8 @@ class ContinueServer(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Access-Control-Allow-Methods", "*")
             self.end_headers()
-            ppt.save("temp.pptx")
+            targetVar = io.BytesIO()
+            ppt.save(targetVar)
             ppt.save(self.wfile)
         else:
             self.send_response(400)

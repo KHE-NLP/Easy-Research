@@ -217,4 +217,4 @@ The time complexity of the training is linear with respect to A, which is pretty
 
     for p, e in zip(prompts, responses):
         print("REAL:\n", p)
-        print("SUMM:\n", e.generations[0].text)
+        print("SUMM:\n", e.generations[2].text)
