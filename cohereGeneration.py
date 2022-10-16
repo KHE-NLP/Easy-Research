@@ -14,11 +14,6 @@ def removeFromList(paragraphs, removals):
 
 def removeNonAscii(paragraphs):
 	to_rem = []
-
-	emailPattern = r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
-	urlPattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
-	citationPattern = r'(\[\0-9{1,256}\])'
-  
 	for p in paragraphs:
 		if(not p[0].isascii()):
 			to_rem.append(p)
@@ -111,33 +106,6 @@ def cleanData(paragraphs):
 	removeShort(paragraphs)
 	removeNonSpaces(paragraphs)
 	removeEmails(paragraphs)
-
-def cleanData(paragraphs_):
-    to_rem = []
-    emailPattern = r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
-    urlPattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
-    citationPattern = r'(\[\0-9{1,256}\])'
-
-    for p in paragraphs_:
-        if (len(p) < 100) and (NOR(p != paragraphs_[0], p != paragraphs_[1])):
-            to_rem.append(p)
-            continue
-        elif re.search(emailPattern, p):
-            to_rem.append(p)
-            continue
-        elif re.search(urlPattern, p):
-            to_rem.append(p)
-            continue
-        elif re.search(citationPattern, p):
-            to_rem.append(p)
-            continue
-        elif p.find("Fig.") != -1:
-            to_rem.append(p)
-
-    for r in to_rem:
-        paragraphs_.remove(r)
-    return paragraphs_
-
 
 
 def get_generation(prompts_):
