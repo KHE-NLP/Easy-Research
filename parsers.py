@@ -8,9 +8,12 @@ from PIL import Image
 
 
 def get_pdf_text(pdf_data):
-    resp = requests.get(pdf_data)
-    resp_bytes = io.BytesIO(resp.content)
-    data = extract_text(resp_bytes)
+    if pdf_data[:8] == "https://":
+        resp = requests.get(pdf_data)
+        resp_bytes = io.BytesIO(resp.content)
+        data = extract_text(resp_bytes)
+    else:
+        data = open(pdf_data).read()
     return data
 
 
@@ -26,9 +29,12 @@ def get_pdf_paragraphs(pdf_data, min_par=40):
 
 
 def get_pptx_slides(pptx_data, ask_desc=True):
-    resp = requests.get(pptx_data)
-    resp_bytes = io.BytesIO(resp.content)
-    ppt = Presentation(resp_bytes)
+    if pptx_data[:8] == "https://":
+        resp = requests.get(pptx_data)
+        resp_bytes = io.BytesIO(resp.content)
+        ppt = Presentation(resp_bytes)
+    else:
+        ppt = Presentation(pptx_data)
 
     slides = []
     for slide in ppt.slides:

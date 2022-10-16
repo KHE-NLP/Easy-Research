@@ -1,0 +1,3872 @@
+SUMMARY:
+Haotian Wu, Zhe Peng, Songtao Guo, Yuanyuan Yang, and Bin Xiao
+
+TITLE:
+VQL: Efficient and Verifiable Cloud Query Services for Blockchain Systems
+SUMMARY:
+Data query in blockchain protocols is expensive so what if we could increase the speed of queries 
+We should also include additional data to allow for more diverse queries
+
+TITLE:
+Idea
+SUMMARY:
+Introduce a Verifiable Query Layer (VQL) which is a middleware layer built into the blockchain (database fingerprint) which also exists on the outside in a cloud environment
+The database is stored in Merkle Patricia Trees which combine Merkle Trees and Trie Trees to get O(logn) in inserts, lookups, and deletes
+
+TITLE:
+Technology
+SUMMARY:
+A verifiable hash is stored in the blockchain to represent the data from the database over a specified amount of time
+Miners will add this fingerprint to the blockchain in the form of a transaction after verifying its accuracy. Miners need to be incentivized and rewarded for this which is not currently built into bitcoin but the authors propose several solutions for this
+
+TITLE:
+Database Fingerprint
+SUMMARY:
+Authors: Hassanzadeh-Nazarabadi, Kupcu, Ozkasap
+Presenter: JT Raber
+
+TITLE:
+LightChain: Scalable DHT-Based Blockchain
+SUMMARY:
+
+TITLE:
+Four Standard Layers
+SUMMARY:
+Others
+Overlay is messy and unpredictable
+LightChain
+Well-defined topology
+Deterministic and efficient lookup strategy
+O(logn) message complexity
+
+TITLE:
+Network: Dissemination of Transactions and Blocks
+SUMMARY:
+Others
+Biased base on peer influence
+Inconsistent due to forks
+LightChain
+O(logn) message complexity for validating transaction/block
+Peers have a uniform chance of being involved regardless of influence
+Blocks are designated to a peer based on its hash value and the DHT
+Sybil proof because it is very very low chance that the same peer would contribute to the consensus to 2 consecutive blocks
+Deterministically resolves forks
+
+TITLE:
+Consensus: Block Generation Decision-Making Process
+SUMMARY:
+Others
+Lots of storage is needed to store all of the blocks
+LightChain
+Each peer is only responsible for keeping a small subset of the randomly assigned blocks and transactions
+Accesses other blocks and transactions on an on-demand basis using the DHT
+Provides at least one copy of each block and transaction accessible at any time with high probability
+Memory complexity of O(b/n) rather than O(b)
+
+TITLE:
+Storage: Read Functionality
+SUMMARY:
+Others
+slow bootstrapping
+LightChain
+Randomized bootstrapping
+O(logn) message complexity and O(n) time complexity to construct a view of the entire ledger
+Much faster
+Complexity to obtain a peers state: message O(logn) time O(1)
+
+TITLE:
+View: the Most Recent State of the Blockchain
+SUMMARY:
+
+TITLE:
+Who’s in the Game?
+SUMMARY:
+Skip Graphs
+DHT-based overlays
+Each node is identified with an IP address and two IDs: a number and a name
+Each node can search and find the address of other nodes by number or name ID
+Synchronization
+Partially synchronous, execution speed and message delay times are bounded
+Timer and timeout method to detect crash failures
+View
+Peers have a set of assets and a balance
+Assets set corresponds to the data objects that a peer initially registers on the blockchain
+Can update later with transactions
+Balance is used to cover transaction generation fees
+A view is represented by a tuple (numID, lastblk, state, balance)
+
+TITLE:
+Some Preliminaries
+SUMMARY:
+
+TITLE:
+So How Does it Work?
+SUMMARY:
+A node joins the system using their IDs and IP address
+Randomized bootstrapping begins
+
+TITLE:
+Joining
+SUMMARY:
+Transactions represents a state transition of the assets of a peer (owner)
+Owner casts the state transition into a transaction, computes the IDs of calidators, searches for validators over the skip graph. It then asks them to validate the transaction
+Validating a transaction means having it signed by a system-wide constant number of validators where their IDs are chosen randomly
+Once the transaction is validated the owner inserts it into the Skip Graph overlay
+New transactions get cast into blocks, which get validated similarly and then inserted into the Skip Graph
+The transaction owner then removes the transactions from the Skip Graph
+
+TITLE:
+Transactions
+SUMMARY:
+Each block and transaction is replicated on owner
+Availability, accessibility, fault tolerance
+Distributedness means peers only need to keep a subset of the ledger
+Good guys get rewarded with money for being good
+They also get rewarded for ratting out bad guys
+
+TITLE:
+Storage and Incentive
+SUMMARY:
+(prev, owner, cont, search_proof, h, σ)
+Previous transaction pointer
+owner id
+contribution (state change)
+proof that the validators were searched for
+hash value of transaction
+h = H(prev||owner||cont||search_proof)
+signatures of owner and validators
+(prev, owner, S, search_proof, h, σ)
+S is the set of all the transactions in the block
+h = H(prev||owner||S||search_proof)
+
+TITLE:
+Transaction and block structure
+SUMMARY:
+Skip Graph Overlay
+Peers exploit the skip graph to search for each other as well as blocks and transactions
+Searching can happen both forwards and backwards with prev and hash
+
+TITLE:
+Network Layer
+SUMMARY:
+
+TITLE:
+Network Layer
+SUMMARY:
+Proof-of-Validation (PoV)
+Set of a uniformly chosen validators for each transaction or block
+Considered valid if its hash value h is signed by t validators
+t and a are both constant protocol parameters
+
+TITLE:
+Consensus Layer
+SUMMARY:
+Numerical ID of each validator is chosen by 
+vi = H(tx.prev||tx.owner||tx.cont||i)
+Search for the peer with that ID, if it can’t be found use the largest ID less than vi
+A transaction tx is sound if it does not precede the latest transaction of its owner on the blockchain
+Stops double spending
+A transaction tx is correct if its cont field represents a valid state transition of the owner’s assets (which is application specific)
+There are fees for a transaction which go to the validators
+
+TITLE:
+Transaction Generation and Validation
+SUMMARY:
+A peer that create a block is called a block owner
+Once it collects min_tx newly generated transactions it casts them into a block and sends it for validation
+A block is consistent if its prev pointer points to the current tail of the blockchain
+Validators watch for changes and terminate validation upon potential forks
+
+TITLE:
+Block Generation and Validation
+SUMMARY:
+Replication
+Transactions and blocks are kept on the owners and validators
+They are efficiently searchable Skip Graph nodes
+
+TITLE:
+Storage Layer
+SUMMARY:
+Randomized Bootstrapping and Fast Retrieval
+View introducers of a new peer is a set of randomly chosen peers that share their view with the new node
+view_introi = H(new_peer.numID||i)
+
+TITLE:
+View Layer
+SUMMARY:
+
+TITLE:
+View Layer
+SUMMARY:
+
+Good peers are rewarded if they stick to the protocol
+They are also rewarded for reporting a misbehaving peer
+They make a transaction showing the misbehavior
+PoV to validate the correctness of the evidence
+Bad guy gets penalized by a fee and is blacklisted
+
+TITLE:
+Incentive Mechanism
+SUMMARY:
+
+TITLE:
+Is it Secure and What Would that Mean?
+SUMMARY:
+Integrity
+Views are not changed except by committing a new block of validated transactions
+Availability
+Two types
+Data
+Service
+
+TITLE:
+Integrity and Availability
+SUMMARY:
+Data availability
+Every validated transaction or block is available in a timely fashion
+Service availability
+Consensus and view layer protocol availability defined in expectation
+Expectation means that honest  nodes can eventually do what they need
+Consensus availability
+Honest nodes who follow the protocols should be able to find enough validators to validate their transactions and blocks
+View availability
+Honest nodes should be able to find enough honest view introducers to bootstrap properly
+Adversaries aim to disrupt the integrity or availabilities of the system
+
+TITLE:
+Availability
+SUMMARY:
+
+Yes!
+
+TITLE:
+So Does it Work?
+SUMMARY:
+SkipSim simulator
+Each node follows the Bitcoin churn trace
+10.6 hours online, 2.8 hours offline
+1 transaction per hour
+100 systems, 10000 peers each, 48 hours
+
+TITLE:
+How Did They Do It?
+SUMMARY:
+
+TITLE:
+Pretty Graphs
+SUMMARY:
+
+For each fraction there exists an a in which the success probability of adversarial peers in compromising the integrity exponentially converges to 0 with growth of t
+
+TITLE:
+What Does this Show?
+SUMMARY:
+
+TITLE:
+This implies that the integrity is preserved even with a corrupted majority
+SUMMARY:
+Implemented and deployed a proof of concept version with 1000 nodes, adversarial fractions 0.16 and 0.33, and block sizes of 10, 20, and 40
+Ran on the google cloud platform
+1 transaction per second per node, 1000 transactions total per node
+2.2 GHz CPU, 3.9 GB memory
+Serialized to avoid crashes on low-power nodes
+
+TITLE:
+Cloud Platform Deployment
+SUMMARY:
+
+
+
+TITLE:
+Cloud Platform Deployment
+SUMMARY:
+LightChain
+Preserves integrity under corrupted majority
+Storage overhead of about 30MB per node in deployment
+66 times less
+Randomized bootstrapping
+380 times faster
+Others
+Fails under corrupt majority
+2GB per node under the same setup
+3 hour bootstrapping
+
+TITLE:
+Comparisons
+SUMMARY:
+Addressable peers, transactions, and blocks
+No storing the entire ledger
+Each peer replicates a random subset of the blocks and transactions and answers other peer’s queries on them
+Considers uniform chance for all participating peers to be involved in the consensus regardless of influence
+
+TITLE:
+Conclusion
+SUMMARY:
+
+Thoughts?
+
+TITLE:
+Seems Pretty Groundbreaking to Me
+SUMMARY:
+
+TITLE:
+MonoxideJiaping Wang and Jao Wang
+SUMMARY:
+
+
+
+Contributions
+
+TITLE:
+
+SUMMARY:
+System, Cross-shard transactions
+Transactions are in three parts. Operation p takes place in Zone A, then is sent as a relay transaction to Zone B, which is added to a block after λ blocks, to help ensure invalidation by fork-resolution does not happen.
+Withdrawals are processed first, with deposits to be confirmed later.
+“Eventual Atomicity”
+Possibility of empty blocks, which would reduce throughput until normal miner mines.
+
+
+
+
+TITLE:
+
+SUMMARY:
+
+
+
+
+
+
+System, sharding
+
+TITLE:
+
+SUMMARY:
+Fork Resolution
+Pre-confirmation
+Unconfirmed relay transactions will not be considered until its originate block is either without a fork, or is on the winning path.
+Post-confirmation
+Relay transaction is invalidated, the node rebuilds the ledger from state checkpoint, and skips invalid relays when re-executing transactions.
+
+TITLE:
+
+SUMMARY:
+A form of batch-mining.
+A single PoW solution can create a block for multiple zones, though only one block per zone.
+The “batch-chaining-block” replaces the chaining block, and is replicated amongst all zones that it mined in.
+
+
+
+
+TITLE:
+Chu-ko-nu Mining
+SUMMARY:
+Increased Security of Shards via Cho-ku-nu
+The total physical hash power required for a successful attack approaches 50%.
+
+Ms = effective hash rate of each zone
+Md = physical hash rate of non-Cho-ku-nu miners
+Mp = physical hash rate of Cho-ku-nu miners
+
+TITLE:
+
+SUMMARY:
+
+
+Results, system
+Mainline DHT for P2P routing and swarm formation
+Distributed environment: 1200 VMs, 48,000 nodes
+15 “Availability Zones” for cross-country latency
+End-to-end peak bandwidth restricted to 30Mbps
+Latency ~102 ms
+Evaluated by playing back historical ERC20 payments in Ethereum. ~75.8m transactions
+32KB block size limit
+15-sec block creation interval target
+15.6 tx/s for one-to-one token transfer
+8.3% average orphan rate
+
+TITLE:
+
+SUMMARY:
+Results
+
+
+
+TITLE:
+
+SUMMARY:
+Leemon Baird
+
+TITLE:
+SWIRLDS Hashgraph Consensus
+SUMMARY:
+
+Goal
+
+
+
+Create a consensus algorithm that achieves fairness in an asynchronous system
+
+TITLE:
+
+SUMMARY:
+Complete Asynchrony
+No leaders
+No round robin
+No proof-of-work
+Eventual consensus
+High speed in absence of faults
+Gossip about gossip
+Virtual Voting
+
+TITLE:
+Core Concepts
+SUMMARY:
+Hashgraph – Data structure that records who gossiped to whom and in what order
+Gossip – Information is passed on to a randomly selected peer
+Gossip about gossip – The history of the gossip itself, which is passed on through the gossip protocol
+Virtual voting – Every member has a copy of the hashgraph, so votes are tabulated locally to achieve BA
+Witnesses – The first event per peer per round
+Famous witnesses – An event that is shown that most members received soon after creation
+Strongly seeing – True if two events are connected by floor(2n/3)+1 peers’ events
+
+TITLE:
+Definitions
+SUMMARY:
+
+Hashgraph
+
+A new vertex is created whenever a peer receives a gossip event from another peer.
+Events record gossip syncs, and contain a hash of the parents, any new transactions the receiving peer creates, and a digital signature.
+
+TITLE:
+
+SUMMARY:
+
+
+
+
+The event (red), contains a hash of the two parent events: the self-parent (dark blue), and the other-parent (light blue). The other ancestor events (grey) are not stored in the hash, but they are determined by all the hashes. Self-ancestor (dark grey) are reachable, while other ancestors are not.
+
+TITLE:
+
+SUMMARY:
+Assuming both peers are honest, if they both have the same hashgraph, then they can calculate a total order of events and get the same answer, reaching consensus without sending votes.
+If the honest peers have different hashgraphs, they will still be consistent. “If both A and B both contain event x, then they will contain exactly the same set of ancestors for x, and the same set of edges between those ancestors”.
+If both honest peers do not know of the same event, then the one without will be caught up through the gossip protocol.
+
+TITLE:
+Virtual Voting
+SUMMARY:
+A peer will calculate the total order of events in their hashgraph by doing a series of elections. In these elections, some events in the HG will be casting a vote, and some will be receiving a vote. 
+The peer will calculate multiple elections, both from its perspective, as well as other peers’ perspectives in order to determine BA.
+
+TITLE:
+Virtual Voting
+SUMMARY:
+A witness event that has been determined by the community that many members can see it, by the start of the next round after it was created.
+Every round will eventually have its witnesses classified as famous or not famous, with at least one of the witnesses being famous. After the famous witnesses are set, they can act as a judge to define total order on the events that have reached them.
+
+TITLE:
+Famous Witnesses
+SUMMARY:
+
+
+
+Strongly Seeing
+Events are incremented to the next round iff they are strongly seen by floor(2n/3)+1 members
+
+TITLE:
+
+SUMMARY:
+A byzantine node sends false vote.
+Voting is all virtual, and as such peers cannot be attacked by making the virtual version vote incorrectly.
+Forking
+Events can only see previous events if they are both known to it, and if no forks by that creator are known to it.
+“If some event w has x as an ancestor but doesn’t have y as an ancestor, then the event w can see event x. However, if both x and y are ancestors of w, then w is defined to not see either of them, nor any other event by the same creator. “
+Inconsistent Hashgraph
+Ignore
+
+TITLE:
+Potential Attacks
+SUMMARY:
+run two loops in parallel: 
+    loop
+        sync all known events to a random member 
+    end loop 
+    loop 
+        receive a sync 
+        create a new event 
+        call divideRounds 
+        call decideFame 
+        call findOrder 
+    end loop 
+
+TITLE:
+Swirlds Hashgraph consensus algorithm
+SUMMARY:
+for each event x 
+    r ← max round of parents of x ( or 1 if none exist ) 
+    if x can strongly see more than 2n/3 round r witnesses 
+        x.round ← r + 1 
+    else 
+        x.round ← r 
+    x.witness ← (x has no self parent) or ( x.round>x.selfParent.round)
+
+TITLE:
+divideRounds procedure
+SUMMARY:
+
+decideFame Procedure
+
+For each witness event, decide whether it is famous.
+
+TITLE:
+
+SUMMARY:
+
+findOrder Procedure
+
+
+
+TITLE:
+
+SUMMARY:
+Tezos: Amendable Chain
+Jason Conley
+
+TITLE:
+
+SUMMARY:
+ Tezos
+What it is and why it is different
+Base functionality 
+The election process
+ Current changes in Tezos
+Emmy+
+Tenderbake
+ Conclusion
+
+
+TITLE:
+Outline
+SUMMARY:
+Recent protocol changes include Florence, Granada, and Carthage
+
+Lot of development / coverage out of Ukraine, who just legalized crypto 
+
+Just recently (~1 year) a new consensus algorithm Tenderbake was put into testing
+
+It is currently replacing the current / old Emmy+ consensus
+
+TITLE:
+History	
+SUMMARY:
+Tezos provides a blockchain platform with a focus on active amendments / changes to its protocols
+	- Users vote with liquid proof-of-stake
+	- Everything happens on chain
+
+Like Algorand, Tezos has the goal of keeping the community from fracturing over ideals while maintaining quick finality 
+
+The platform has three mechanisms that create an amendable environment
+	- Base functionality definitions
+	- Two chains for testing and development
+	- An election process
+
+
+
+TITLE:
+The Main Idea
+SUMMARY:
+Lasts ~3 weeks, divided into quarters
+
+First quarter: Proposals, stakeholders vote to push through proposals
+Second quarter: Amendment with most approvals is now voted on. Stakeholders can vote for or against, or even abstain. Abstains count for the quorum
+Third quarter: If amendment is approved, replaces test protocol in test chain
+Fourth quarter: Second vote, if it reaches the quorum++ it is pushed to the main chain
+
+Quorum needed to pass is 80% at writing, but like everything can be changed
+
+Voting results are written as blocks on the chain
+
+TITLE:
+Election Process
+SUMMARY:
+ A chance to Bake
+Based on some minimum stake value, a group of nodes have a chance to bake
+ Endorsements
+Blocks must be endorsed by some number of stakeholders, chosen randomly
+
+ The notion of a cycle, number of blocks or time period (~34 hours)
+ Timestamped blocks, blocks from next round are buffered
+ Rewards for participation and punishments for bad acting
+
+TITLE:
+Base Functionalities
+SUMMARY:
+To bake you need to own a “roll” (8,000 tokens), every roll in the system is randomly ranked in a list, first place roll-owner has some time to propose a block before the next in line is given the chance
+
+Blocks are signed by at most 32 randomly chosen rolls, highest priority block with most signatures is added to the chain
+
+More signatures = less block delay
+
+Result of multiple iterations: Babylon Carthage Granada
+
+TITLE:
+Emmy+ (Nakamoto Style)
+SUMMARY:
+Operates in partial synchrony and can survive asynchrony without forks. Adapts another PBFT algorithm Tendermint to Tezos by relaxing the reliable broadcast assumption
+
+Tenderbake assumes “best effort broadcast,” a message sent by a correct process during synchrony will be delivered
+
+Given local clocks being loosely synchronized, nodes can compute a round start and end that will be the same length for all nodes
+
+Validators are chosen randomly in proof-of-stake, these nodes run Tenderbake to agree on new blocks. These blocks are final after being buried one level
+
+TITLE:
+Tenderbake: “Shark tolerant”
+SUMMARY:
+For a block level L, the committee of Validators will run a round of PBFT
+
+Sequential rounds increase in length, and eventually reach a decision 
+	- Tenderbake increases round duration so that eventually there will be a round	within partial synchrony
+
+A process may move to another level L + 1, and will wait until other processes catch up
+
+When a process receives a proposal, for each round that the process witnesses a quorum, it “locks” or writes in that blocks header that it witnessed the quorum on that round
+
+TITLE:
+Tenderbake consensus
+SUMMARY:
+Ethereum contracts are written in Solidity mostly, Bitcoin is more open ended, Tezos pushes the idea to code contracts and nodes in different languages
+
+Tezos defined a pipeline for new algorithms on-chain and community driven, and allowing the election process to happen in a public space for all Tezos users is important for participation
+
+Tenderbake is an interesting adaptation of PBFT that utilizes tools already used within Tezos, scaling isn’t an issue because of the proof-of-stake chosen validators, and asynchrony doesn’t break it because of the tracking messages and cycle notion
+
+TITLE:
+Conclusion
+SUMMARY:
+By Sylvie Delaët, Stéphane Devismes, Mikhail Nesterenko, Sébastien Tixeuil
+
+
+TITLE:
+Snap-stabilization in message-passing systems
+SUMMARY:
+Snap-stabilization is a self stabilization technique where from any arbitrary initial state the algorithm immediately operates correctly
+
+Previous algorithms utilized shared registers which is a strict communication requirement, instead this paper considers a standard message passing system
+
+TITLE:
+Idea
+SUMMARY:
+Nodes communicate through n – 1 FIFO bidirectional asynchronous channels (fully connected network)
+The authors prove that if the channels have unbounded capacity snap-stabilization is impossible as there could be an unbounded number of arbitrary messages in the channels
+Therefore, a limit is put on channel size and any additional messages pushed to the channel are lost
+It is assumed channel capacity is 1 however the algorithm can be extended if the capacity is bounded and known
+
+TITLE:
+Communication
+SUMMARY:
+The algorithm presented in this paper performs Propagation of Information with Feedback (PIF) which is a standard snap-stabilization technique
+The algorithm is designed so that some node p can broadcast a message and receive feedback about the message from everyone which it may use to continue operations
+
+TITLE:
+PIF
+SUMMARY:
+Step 1 – assume node p wants to broadcast a message, it will wait until the previous broadcast is done even if caused by a fault
+Step 2 – p will set a tracking variable for the State of every process q to State[q] = 0
+Step 3 – repeatedly send its message with a flag = State[q] to every q
+Step 4 – q upon receipt of a message q will set its Nstate = flag and if flag < 4 reply to p with a similar message
+Step 5 – p upon receipt of a message with a flag < 4 increment State[q] and return to step 3
+
+Termination – when State[q] == 4 for all q the PIF is done
+
+
+TITLE:
+Algorithm
+SUMMARY:
+Combining the previously designed algorithms and node identifiers to designate a leader mutual exclusion can be achieved
+The leader controls who may be in the critical section by performing PIFs, which will notify the nodes who may be in the critical section and when it is again empty so someone else can request access
+
+TITLE:
+Extension to Mutual Exclusion
+SUMMARY:
+on the Ethereum Blockchain
+Authors: Hu, Manzoor, Ekparinya, Liyanage, Thilakarathna, Jourjon, Seneviratne
+Presented by: JT Raber
+
+TITLE:
+A Delay-Tolerant Payment Scheme Based
+SUMMARY:
+Half of the world doesn’t have consistent internet
+A quarter doesn’t have basic banking services
+This is bad
+Distributed networking might help…
+With changes, that is
+Lots of data sent (200MB/h for Bitcoin)
+Partitions lower security
+
+TITLE:
+Introduction
+SUMMARY:
+Ethereum-blockchain-based local transaction verification scheme for online payment operators
+Low cost
+Secure
+Based on private Ethereum blockchain
+Smart contracts for service management
+
+TITLE:
+Proposal
+SUMMARY:
+Community-run Base Stations
+Satellite station
+Limited backhaul connectivity
+Not ideal
+SMS or USSD
+Not secure enough for banking
+Easily spoofable
+Require additional verification
+Not ideal either
+
+TITLE:
+Previous Solutions
+SUMMARY:
+Payment operators, proxies, villages
+Each village has its own isolated network
+Uses token-based local currency
+Avoid inflation of local currency
+Two types of transactions
+Regular
+User to user
+Currency exchange
+Fiat to token
+Done by proxies
+
+TITLE:
+System Architecture
+SUMMARY:
+Smart Contracts
+Record account types
+User balances
+Distribute mining rewards
+Notifies the proxy when a new user joins
+When an internet connection is established, the proxy syncs with other blockchain nodes, updates user balances, and processes currency exchange transactions
+
+TITLE:
+System Architecture
+SUMMARY:
+Assumptions
+All individual mining nodes have equal and stable computational power.
+Block size is sufficient to include all transactions for immediate processing as the transaction rate within a village can be considerably lower compared to public Ethereum blockchain.
+Zero transaction fees and no rewards for mining stale blocks as in the proposed system rewarding is controlled by the payment operator using Tokens.
+Network bandwidth available within the village is sufficient for all blockchain related data traffic.
+Lots of scary looking probabilistic mathematical models
+
+TITLE:
+Modeling and Design
+SUMMARY:
+Environment
+Ubuntu 16.04, 1 CPU core, 2GB memory, 10GB storage
+Emulate high latencies using Linux traffic control
+Emulate churn using the firewall
+Used Geth for empirical evaluations
+Stabilized for a few hours
+Nonce value: 0x42
+Gas limit: 0x08000000
+Difficulty: 0x400000
+
+TITLE:
+Evaluation
+SUMMARY:
+
+TITLE:
+Time for some Graphs
+SUMMARY:
+
+TITLE:
+And some Implementation Diagrams
+SUMMARY:
+Some shortcomings
+Proof of Work is inefficient, might be a better way to do this in the future
+The proposed system does not account for malicious behavior
+The authors hope to address these weaknesses in future work
+
+TITLE:
+Discussion and Conclusion
+SUMMARY:
+Interesting idea
+What else could private chains be used for?
+Are there other ways to solve this problem?
+
+TITLE:
+Thoughts
+SUMMARY:
+Takeshi Kaneko and Kazuyuki Shudo
+
+TITLE:
+Broadcast with Tree Selection on An Overlay Network
+SUMMARY:
+If a single node is broadcasting, a spanning tree can be used to achieve a small number of messages, but the length of the tree is an issue.
+If multiple nodes are broadcasting, efficient topology differs per node, reducing efficiency.
+
+TITLE:
+Problem
+SUMMARY:
+
+TITLE:
+Proposed Solution
+SUMMARY:
+Each spanning tree is embedded in a generic overlay network managed by a peer sampling service.
+Spanning trees are maintained along Plumtree protocol.
+Each node has two types of neighbors: eager and lazy.
+Eager neighbors are along tree edges, lazy are not.
+Broadcasts are performed over a tree/forwarding to eager peers.
+If a node gets a message from a non-eager peer, it will begin repairing.
+Nodes will prune both themselves and the sender if they receive the same message from multiple neighbors.
+
+TITLE:
+System
+SUMMARY:
+When a node receives a broadcast request, it selects a tree to send on.
+To select the tree
+It gets the max distance of all nodes from the source node, for each tree.
+It then returns the tree with the smallest max distance’s ID
+
+TITLE:
+Broadcast with Tree Selection
+SUMMARY:
+
+
+Results
+
+
+
+Path reduction while maintaining small number of messages.
+Greater path reduction for random graphs than Barabasi-Albert Model graphs.
+Maximum path length reduced by 28% compared to Plumtree on random, 7% for BA model.
+
+
+
+TITLE:
+
+SUMMARY:
+Jason Conley
+
+TITLE:
+OverChain: “A Robust Overlay”
+SUMMARY:
+DHT hypercube made up of committees at each vertex
+
+Theoretical, no implementation in the strict sense 
+
+Bitcoin is susceptible to network partition attacks, because of the weak assumptions / connections of the overlay
+
+TITLE:
+Background
+SUMMARY:
+Eclipse attack 
+Essentially partitioning a peer to the point where their only source of information is from adversarial peers
+From this point, selfish mining, double spending, etc. 
+Do Replication for connections, make committees
+Adversaries now must maintain multiple peers to overwhelm connections
+Something like a Cuckoo rule to prevent byzantine committees
+
+Distributed random coin flips, local randomization from global string
+
+TITLE:
+The Eclipse Attack and how to prevent it
+SUMMARY:
+The methods mentioned before are expensive in either computation or message passing
+
+They also assume that a joining peer will have contact with an honest node each time or that these peers are random, i.e., the bootstrapping problem
+
+Essentially, we need something that can handle (more or less):
+Coordinating a dynamically sized network (bootstrapping problem)
+Byzantine nodes
+
+TITLE:
+Issues with current solutions
+SUMMARY:
+The authors want to store information on chain to coordinate a dynamic network and handle byzantine interference
+
+The information will be an ID for 1 node
+The chain of blocks storing ID’s will be the directory
+The directory is X blocks long. X = an order of block time * log^2 (N)
+It will manage new peers joining the network
+
+The ID is chosen by the miner of a block, and the ID is from the miner’s committee. The promoted node manages a set of committees 
+
+TITLE:
+The Blockchain! Rather the OverChain
+SUMMARY:
+A directory will manage some order of B * log^2(N) blocks. A “bucket” is some order of log^2(N) blocks long
+This guarantees at least log(N) honest peers in a directory
+ 
+Buckets move through “phases”. Each pertaining to the blocks position in the directory 
+
+A directory has a predetermined mapping from committees to buckets. Any two buckets in a directory reside over disjoint sets
+
+
+TITLE:
+The Directory
+SUMMARY:
+Node Q wants to join the network via node P, Q must provide a proof to join. P must proof-of-work Q’s join proof to allow the peer in
+
+P requests the contact info about a committee c from all nodes in the directory that relate to c
+
+If the join request was recent enough Q is allowed to send its info to the committee and it has officially joined
+
+Due to logarithmic redundancy, it takes O( log^3 (N) ) messages for Q to join the network
+
+TITLE:
+The Join Algorithm	
+SUMMARY:
+All nodes know the number of nodes in their committee
+
+A random committee broadcasts the size of their group
+
+All nodes use this knowledge to guess the new network size, and then reconstruct the hypercube as needed
+
+TITLE:
+Handling Large Shifts in Network Size
+SUMMARY:
+Two requirements to recover from failure:
+The joining process is not affected
+
+A large fraction of honest peers can run the blockchain protocol
+The blockchain itself guarantees this
+
+With these two guarantees, the blockchain will persist and new nodes will become directory nodes, new committees will form as lifetimes run out
+
+
+A note about node lifetimes: Directory nodes are alive for the duration they are part of the directory. Non-directory nodes have a lifetime of half-life / X log^2 (N)
+
+TITLE:
+Recovering from Catastrophic Failures	
+SUMMARY:
+The authors handle coordination / churn by putting ID’s on the chain and having them coordinate together the join process
+
+Handle byzantine nodes with node lifetimes, properties of the chain, and phases of buckets
+
+Now the overlay network only needs to worry about communication
+
+TITLE:
+Recap
+SUMMARY:
+Interesting ideas incorporating a DHT network with blockchain to create an efficient overlay network
+
+To re-join the network, both nodes must proof-of-work on specific information. This must be done in a timely manner because of the lifetime of the directory
+
+Re-joins are going to happen constantly due to node lifetimes
+
+TITLE:
+Thoughts and Ideas?
+SUMMARY:
+Anonymous Author(s)
+Anonymous Affiliation
+
+TITLE:
+“On Finality in Blockchains”
+SUMMARY:
+This paper …
+
+Defines blockchain finality as the instance when it is no longer possible to remove a block that has previously been appended to the blockchain.
+
+Introduces the idea of bounded revocation, i.e., putting a bound on the number of blocks that can be revoked from the current blockchain.
+
+Introduces three forms of deterministic eventual finality:
+EF★ (weakest) : no guaranteed revocation bound.
+EF◇c                    : guaranteed revocation bound; bound is unknown.
+EFc                       : guaranteed revocation bound; bound is known.
+
+TITLE:
+Brief Introduction
+SUMMARY:
+The weakest form of deterministic eventual finality (EF★) cannot be solved in an asynchronous environment when using the reconciliation rule of bitcoin (i.e., the “longest” chain rule).
+
+An algorithm that solves  EF★ in an asynchronous environment with…
+An unbounded number of byzantine failures
+An infinite set of processes that can append infinitely many blocks
+
+An algorithm (accountable forking algorithm) that solves  EF◇c in an eventually synchronous message-passing system with…
+ƒ  < n/2
+
+EFc  is equivalent to Consensus [proof on pg. 8].
+*
+
+TITLE:
+Paper’s Main Non-trivial Results/Contributions
+SUMMARY:
+Assumptions: 
+Asynchronous system
+Possibly infinite set of processes which can append infinitely many blocks
+Byzantine failures
+Each process is equipped with an eventually reliable broadcast primitive (hence why the number of Byzantine processes is unbounded).
+
+Algorithm is quite simple and consists of  using local selection functions and characterizing blocks by their parents and producer signatures…
+
+If a process appends a block, it broadcasts the new chain obtained by appending the new block.
+
+When a process delivers a blockchain, it merges said chain with the blocktree if the chain is valid.
+
+Correct processes then select a new chain from the blocktree using a selection function that goes from the genesis block to a leaf, choosing at each fork the edge to the child with the lowest creator identifier (blocks are ranked by the creator identifier).
+
+… Eventually, all correct processes will have the same view of the blocktree due to the eventually reliable broadcast primitive.
+*
+
+TITLE:
+Algorithm 1  (EF★ with an unbounded number of Byzantine processes)
+SUMMARY:
+Assumptions: 
+Less than n/2 Byzantine processes
+Each process has access to the eventually reliable broadcast primitive mention previously
+
+The  AF  algorithm is an extension to the Streamlet algorithm presented by Benjamin Chan and Elaine Shi in another paper, “Streamlet: Textbook Streamlined Blockchains”
+AF  algorithm guarantees that for any given fork, correct processes can blame it on a Byzantine process and exclude it from the voters.
+
+A process is detected as Byzantine if  it votes for inconsistent blocks.
+*
+(solving  EF◇c in an eventually synchronous message-passing system)
+
+TITLE:
+The Accountable Forking (AF) Algorithm 
+SUMMARY:
+The paper…
+
+Shows that it is impossible to reach a bound on the number of blocks that can be revoked in an asynchronous system .
+
+Proposes a solution with ƒ < n/2 guaranteeing that a bound is eventually reached in an eventually synchronous system.
+
+Shows that deterministic eventual finality with no bound on the number of revocable blocks cannot be solved using the reconciliation rule of Bitcoin (“longest” chain rule) in an asynchronous system.
+
+Proposes an asynchronous solution to the weakest form of deterministic eventual finality with an unlimited number of Byzantine processes (yet, there is requirement on how processes are arranged on the network topology).
+
+TITLE:
+Conclusion
+SUMMARY:
+
+
+TITLE:
+Kademlia
+SUMMARY:
+Much like a hash table in that it holds data to lookup however the data is distributed over a group of nodes
+Supports lookups, inserts, and some churn
+
+
+TITLE:
+Distributed Hash Table (DHT)
+SUMMARY:
+Node ids span a 160 bit space which creates a binary tree
+A node needs a link to nodes in every subtree it is not in to ensure a fully connected network
+When queried a node routes the message to the nearest subtree for that query, and that node does the same, until it reaches the desired location
+
+
+TITLE:
+Kademlia Algorithm
+SUMMARY:
+Kademlia will change it’s random links to increase the speed of lookups for very popular keys
+To support churn the algorithm will re-publish keys periodically which will refresh the nodes neighbor lists
+
+
+TITLE:
+Optimizations
+SUMMARY:
+
+TITLE:
+Chord
+SUMMARY:
+PeerReview
+Andreas Haeberlen, Petr Kouznetsov, and Peter Drushcel
+
+
+
+
+TITLE:
+
+SUMMARY:
+
+Motivation
+How to ensure that Byzantine faults are eventually detected tied to the faulty node.
+Ensure that a correct node can defend itself against accusations.
+
+TITLE:
+
+SUMMARY:
+
+System Model
+Nodes consist of a state machine, detector module, and application. The detector module can observe all inputs and outputs to the state machine and communicate with other nodes. 
+The detector module can issue one of three statements about other nodes to its application – exposed, suspected, or trusted.
+Exposed is raised when proof of misbehavior is obtained, while suspected is raised when a node does not respond to a challenge that is issued.
+
+
+TITLE:
+
+SUMMARY:
+System Model, Assumptions
+
+State machines are deterministic
+Messages from a correct node to a correct node is eventually received.
+Nodes use a hash function that is pre-image, second pre-image, and collision resistant.
+The system is permissioned, and nodes can sign messages. Signatures cannot be forged.
+Each node can access a reference implantation to create a snapshot of a state machine’s state.
+Each node has a set of witnesses, of which there is at least one correct node.
+
+TITLE:
+
+SUMMARY:
+
+Design
+Logs are append only and contain all the inputs and outputs of a node’s state machine in chronological order. In addition, each record contains a hash value of the previous log’s hash + the current log.
+To ensure that the node’s log is complete, a log entry for a received message must include an authenticator from the sender node, or vice-versa.
+In order to maintain that each node only has a single, linear log, periodically each witness of a node will challenge the node to return all log entries in a range in order to verify correctness.
+In addition, each witness of the node will send the authenticators to the witnesses of the other node involved in the authenticator, in order to remove accomplice nodes. 
+
+TITLE:
+
+SUMMARY:
+Design, Continued
+
+Periodically, each witness of a node will request the node’s latest log, and all of the logs since its last audit. It will then use a reference implantation in order to determine if the node is consistent.
+To ensure that faulty nodes are suspected, challenges are sent, with the correct response consisting of a log segment or an acknowledgement, depending on the type of challenge. If no response is given, then the challenged node is suspected until it has done so.
+Every node can periodically fetch the challenges collected by the witnesses of another node.
+
+TITLE:
+
+SUMMARY:
+
+Evaluations, Throughput
+Average throughput for a system where nodes are witnesses for other nodes, drops to 1/w+1.
+In this case, the number of witnesses is 2.
+However, audits can be deferred temporarily while workloads are busty, increasing throughput.
+
+TITLE:
+
+SUMMARY:
+Evaluations, Message Latency
+
+PR increases latency, as each message must be signed and signatures must be confirmed, as well as logs must be appended.
+NFS – No-op, small propagation delay and processing time.
+NFS+WRAP – Adds cost of invoking a wrapper for each RPC request.
+PEERREVIEW-NOSIG --  Just the PeerReview wrapper, minus signatures
+PEERREVIEW-1024 – Full PeerReview with 1024-bit RSA keys.
+
+TITLE:
+
+SUMMARY:
+
+Evaluations, Fault Injection
+
+Three faulty nodes are trying to censor an object. 
+The faulty nodes store the replica of the object.
+With just ePOST, lookups of a censored object take a long time and can persist indefinitely, while with PR, faulty nodes are exposed after the first incorrect response, allowing ePOST to repair the routing table.
+
+Overlay multicast’s response to freeloaders 
+Without PR, a freeloader can get away with never forwarding unless challenged.
+With PR, a freeloader is required to respond to more challenges.
+
+TITLE:
+
+SUMMARY:
+Sajjad Rahnama, Suyash Gupta, Rohan Sogani, Dhruv Krishnan, Mohammad Sadoghi
+
+TITLE:
+RingBFT: Resilient Consensus over Sharded Ring Topology
+SUMMARY:
+BFT is efficient primarily for single shard transactions, however cross shard transactions are common.
+Fault tolerance, high throughput, low latency
+Inexpensive consensus of single-shard transactions
+Flexibility of employing different existing consensus protocols.
+Deadlock-free two ring consensus
+Cheap communication between shards
+
+In order to accomplish, requires shards to adhere to ring order, follow the principle of “process, forward, and re-transmit”, and ensure communication between shards is linear.
+
+TITLE:
+Problem													Goal
+SUMMARY:
+Fault Tolerant Requirement: Byzantine nodes are less than ⅓ of total replicas per shard
+Cross-shard Transactions: A simple CST can have each shard individually run consensus, while more complex CSTs include dependencies.
+Deterministic Transactions: The data-items for which the transaction will read/write are known prior to the start of consensus.
+Ring Order: Each shard has a position in a ring topology which determines the flow of a CST
+Authenticated Communication: Intra-shard transactions use message authentication codes, while CSTs use digital signatures. 
+
+TITLE:
+System Model
+SUMMARY:
+Follows the principle of “process, forward, and re-transmit”
+For each CST, the shard with the lowest identifier in ring order is selected as the initiator shard which starts consensus on the client transaction. 
+Consensus guaranteed in at most two rotations across the ring.
+
+TITLE:
+Cross Shard Transactions
+SUMMARY:
+Client Request
+Client sends transaction to the first shard in ring order.
+Client specifies all included shards as well as read-write sets
+Client Request Reception
+Shard checks that message is well formed, and whether it is first in ring order amongst involved shards.
+If both are true, then adds transaction to sequence, calculates digest, and broadcasts preprepare message.
+Pre-prepare Phase
+If well formed, and the replica has not agreed to support any other request, broadcasts prepare
+Prepare Phase
+When nf prepare messages are received, broadcasts commit message
+Commit and Data Locking
+After nf commit messages are received, locks all read-write sets that transaction T needs to access.
+Forward to Next Shard
+Execute
+Prepare and Commit messages can be processed/broadcasted out of order, but locks data in transactional sequence order
+
+TITLE:
+Cross-Shard Consensus Algorithm
+SUMMARY:
+Several protocols are used to guarantee liveness during periods of synchrony: checkpoints, retransmission, and viewchange.
+Three (3) timers are used for detection: local, transmit, and remote.
+Client Behavior and Attacks
+Faulty Primary and/or Unreliable network
+Malicious Primary
+
+
+Cross-Shard Attacks
+No Communication
+Partial Communication
+
+TITLE:
+Uncivil Executions
+SUMMARY:
+ResilientDB provides the network layer, and uses Nanomsg-NG to communicate messages through TCP/IP.
+Each replica is associated with a parallel pipelined architecture, as seen on right.
+To record transactions, a singly linked-list is used as an immutable ledger-blockchain
+
+
+TITLE:
+Design and Implementation
+SUMMARY:
+
+
+
+TITLE:
+Evaluation
+SUMMARY:
+RingBFT allows for more efficient cross-shard transactions, resulting in a much greater throughput and greater scalability.
+It does this by keeping consensus deadlock-free, requiring each shard to participate in at most two (2) rotations, and keeping to a specific ring order.
+
+TITLE:
+Conclusions
+SUMMARY:
+Abdelatif Hafid, Abdelhakim Senhaji Hafid, Adil Senhaji
+
+TITLE:
+Sharding-Based Proof-of-Stake Blockchain Protocols: Security Analysis
+SUMMARY:
+
+Goal
+
+
+
+Unlike Proof-of-Work models, there are relatively few ways to determine the security of systems using Proof-of-Stake.
+As such, they develop a probabilistic model to analyze security for sharding-based PoS blockchain systems.
+The mathematical model computes probability of committing a faulty block and then gives the # of years for the system to fail.
+
+TITLE:
+
+SUMMARY:
+
+
+TITLE:
+Visualization of Model
+SUMMARY:
+The network contains a single “beacon” chain and ς shard chains.
+Each of the shard chains work in parallel and are synchronized by the beacon chain.
+Each shard has their own committee which is assigned by the beacon chain.
+Each committee processes transactions that belong to the shard.
+When a new block is created the beacon committee verifies the block. If it is valid, the committee adds the bl0ck header to the beacon chain. If not, then they drop the block and send proof to the shards to vote on whether the corresponding shard’s committee should be removed.
+Each epoch has the beacon chain shuffle committees.
+
+TITLE:
+Probabilistic Model
+SUMMARY:
+
+Faulty Block Committing
+
+
+
+In order for a faulty block to be committed, it must be verified by at least 2/3 of a shard’s committee members, at least 2/3 of the beacon’s committee members, and by at least 2/3 of all shard’s committees.
+
+TITLE:
+
+SUMMARY:
+
+Results & Evaluation
+Network has Users = 2000, Validators in a shard = 200, Validators in beacon chain = 400, beacon/committee resiliency =0.333. Shard resiliency = 0.1, 0.2, and 0.3.
+
+Probability of committing a faulty block decreases as committee size increases.
+
+
+TITLE:
+
+SUMMARY:
+
+Chance for all shards to commit a faulty block 
+Decreases as size of the committee increases
+
+
+TITLE:
+
+SUMMARY:
+
+Chance of beacon chain to commit
+Also decreases as committee size increases.
+
+
+TITLE:
+
+SUMMARY:
+Scenario 1: N = 2000, ς = 8, V = 200, V’ = 400, r = r’ = 0.333
+Scenario 2: N = 4000, ς = 8, V = 400, V’ = 800, r = r’ = 0.333
+
+TITLE:
+Time to fail
+SUMMARY:
+
+Conclusion
+
+
+
+By adjusting size of a shard’s committee, as well as the size of the beacon’s committee, Blockchain systems can be guarded against malicious nodes.
+
+TITLE:
+
+SUMMARY:
+Authors: Yingjie Xue, Maurice Herlihy
+Presented by: JT Raber
+
+TITLE:
+Hedging Against Sore Loser Attacks in Cross-Chain Transactions
+SUMMARY:
+One type of asset for another
+Escrow
+Smart contracts
+
+TITLE:
+Cross-chain Transactions
+SUMMARY:
+Volatile prices
+Walk-aways
+
+TITLE:
+Problem
+SUMMARY:
+Standard cryptography
+Synchronous blockchain
+Hashed timelock contracts
+Two-party
+N-party
+Brokered transactions
+Auctions
+
+TITLE:
+Proposal
+SUMMARY:
+Premiums in case of walk-away
+Possibly bootstrapped
+
+TITLE:
+Two-party
+SUMMARY:
+Leaders
+Directed graph
+
+TITLE:
+N-party
+SUMMARY:
+Middle man
+
+TITLE:
+Brokered transactions
+SUMMARY:
+Only auctioneer pays premiums
+Secrets on a per bidder basis
+
+TITLE:
+Auctions
+SUMMARY:
+Good to have safety
+Smart contracts are an interesting topic
+Possibly more uses for them in single-chain applications?
+
+TITLE:
+Thoughts
+SUMMARY:
+Authors: Dilip D. Kandlur and Kang G. Shin
+
+TITLE:
+Reliable Broadcast Algorithms for HARTS
+SUMMARY:
+Create a set of broadcast algorithms developed for a multicomputer system with hexagonal mesh topology, using virtual cut-through switching.
+The algorithms deliver multiple copies of a message from a source node to every other node through disjoint paths.
+Can be used for broadcasting in presence of byzantine nodes whose identities are not known.
+Motivation: Applications in clock synchronization and distributed agreement in presence of faults
+
+TITLE:
+Goal
+SUMMARY:
+
+
+
+
+Hexagonal Mesh Topology
+
+TITLE:
+
+SUMMARY:
+
+TITLE:
+Direction Labeling
+SUMMARY:
+
+
+
+
+Broadcast Primitive
+
+Operation takes place at the link level
+Designed to reduce store-and-forward communication
+Packet header contains info for handling broadcasts messages, (e.g. type, distance, step, and tag)
+Routing controller examines tags of the packet for nonzero values, and whether the corresponding link is available.
+Routing tags are updated to reflect the new distance to its destination.
+
+TITLE:
+
+SUMMARY:
+Deliver refers to the delivery of the packet by the link controller to the processor.
+Send_on_link relays the packet to the next node in the same direction in which it arrived.
+
+TITLE:
+Broadcast Primitive
+SUMMARY:
+Executed by the source node
+Common to all broadcasting algorithms
+Sends packet in each available direction, for the entire diameter of the hexagonal mesh.
+
+TITLE:
+BCAST_INIT
+SUMMARY:
+As a result of the RELAY primitive, the packet is sent along two axes: the opposite of the direction the packet was received on, and the axis next to it.
+
+TITLE:
+SBCAST_RELAY
+SUMMARY:
+Algorithms that deliver k copies of a message to each node using disjoint paths.
+Used in place of acknowledgment-retry.
+
+
+TITLE:
+Multiple Copy Broadcast
+SUMMARY:
+Similar to SBCAST_RELAY, but the message is forwarded in two directions
+After packet reaches edge, sent forward n-1 steps
+
+TITLE:
+2-BCAST
+SUMMARY:
+Nodes on the principal axes transmit the message left for n-1 steps.
+Extreme nodes on the axes transmit the packet n-1 steps left.
+
+TITLE:
+3-BCAST
+SUMMARY:
+4-BCAST and 5-BCAST are restricted forms of 6-BCAST
+Uses a tag field to ensure only relevant nodes execute an additional forwarding step.
+Nodes on the extremities of the principal axes use tags ‘A’ and ‘B’.
+The immediate neighbors of the broadcast source node with packet.distance of n-2, use tags ‘C’ and ‘D’
+
+TITLE:
+6-BCAST
+SUMMARY:
+
+TITLE:
+(4-)6-BCAST Algorithm
+SUMMARY:
+
+TITLE:
+4-BCAST
+SUMMARY:
+
+TITLE:
+5-BCAST
+SUMMARY:
+Latency is dependent on system load and number of cut-through routes.
+Time required to transmit a packet of length M:
+S + rM
+S is packet set-up time and r is transmission rate of the link
+When a packet cutes through a node, delay experienced is the time taken to receive and examine the header, a small constant, d.
+S + rM + id
+Where i is the number of cut through nodes
+Best case for SBCAST is: 2S + 2rM + (n-3)d
+If the network is otherwise idle
+
+TITLE:
+Algorithm Analysis
+SUMMARY:
+Algorithm A is the RELAY primitive, using send_packet with a distance of 3n(n-1)
+p = utilization of each link
+Average-case broadcast latency for Algo. A is (l + 1)(S + rM) + (3n^2 – 3n – 1 – l)d
+
+Where l = (3n(n -1) -1)p
+
+TITLE:
+Algorithm Analysis
+SUMMARY:
+1 clock cycle = 1.5 μs
+Compared to SBCAST
+
+TITLE:
+Simulation Results
+SUMMARY:
+
+TITLE:
+Simulation Results
+SUMMARY:
+Useful due to the algorithms simplicity and efficient use of virtual cut-through.
+Relevant to real-time systems where the time overhead of identifying all faulty processors cannot be tolerated.
+Can be applied to wrapped rectangular meshes.
+
+TITLE:
+Thoughts
+SUMMARY:
+
+
+TITLE:
+Avoiding the Babbling-Idiot Failure in a Time-Triggered Communication System
+SUMMARY:
+Nodes communicate on a broadcast bus (only one node may send a message at a time and all messages are broadcast)
+Enforced Synchronous communication
+Messages can be checked for corruption
+
+TITLE:
+System
+SUMMARY:
+Node sends correct messages at correct times
+Node sends corrupt messages that can be determined as corrupt
+Node sends no messages at all
+
+TITLE:
+Fail-Silence
+SUMMARY:
+Adding redundancy - replicating subunits within the node which must agree to proceed
+Adding error detection - in both hardware and software to prevent error propagation
+Time-triggered communication - each node may only communicate at specified times 
+Bus Guardian - in charge of maintaining ensuring valid communication for the nodes
+
+TITLE:
+Enforcing Fail-Silence
+SUMMARY:
+f +1 threshold if fail-silence can be made the only type of failure
+A very strong requirement
+Does not relate well to our babbling idiot problem
+
+TITLE:
+Results
+SUMMARY:
+Authors: Amotz Bar-Nov, Danny Dolev
+Presented By: Kendric Hood
+
+
+TITLE:
+Shifting gears: Changing Algorithms On The Fly To Expedite Byzantine Agreement 
+SUMMARY:
+Start with an inefficient algorithm, normally with high tolerance, and switch to a more efficient one (normally with low tolerance) later in the computation  
+This is done in the case that starting at with a highly efficient low tolerance is not possible i.e., the tolerance threshold is violated 
+The resulting algorithm can obtain some benefit from both
+
+TITLE:
+GOAL
+SUMMARY:
+Synchronous System
+Complete network
+No restriction on byzantine behavior
+However, a peer can always identify the source of a message
+Each peer has a unique ID
+Problem is byzantine agreement
+One peer starts with input, called source. The source must broadcast this value to all other peer. All peers must agree on the value sent by source 
+
+TITLE:
+Model 
+SUMMARY:
+
+TITLE:
+Algorithm Type
+SUMMARY:
+Based on Lamport 1980 and Fast Agreement in Networks with Byzantine Nodes
+Two phase
+Information gathering and majority voting  
+
+
+
+
+TITLE:
+The Exponential Algorithm
+SUMMARY:
+
+TITLE:
+Information gathering
+SUMMARY:
+A majority vote function (Resolve) is reclusively applied to the tree to find the preferred value (i.e. decision value)
+
+TITLE:
+Data Conversion (voting)
+SUMMARY:
+During the execution of the Exponential Algorithm byzantine nodes can be detected if they exhibit byzantine behavior
+Once a node is discovered as byzantine it’s outputs (messages sent) can be masked. Leading to two desired features 
+Fault detection 
+Fault masking 
+L is known as a peers list of known faulty neighbors 
+
+TITLE:
+Detection of Byzantine nodes
+SUMMARY:
+Discovered Fault: A fault is discovered if at least one honest peer has the fault listed in L
+Globally Detected Fault:  A fault is globally discovered if all honest peers have the fault listed in L
+The rules for discovering a fault are used during the information gathering phase and are run by each peer independently at the end of each round
+A majority vote can not be gotten (i.e.) tie 
+There exists a majority but value other then the favored one appear in more then T – length(L)
+Fault masking: All outputs from a fault listed in L are ignored. This is what enables safely  shifting to a lower tolerant algorithm
+
+TITLE:
+Fault detection 
+SUMMARY:
+A shift is the transformation of the output of a round A in a computation of Algo1 to the input for round B in Algo2
+Algo1 and Algo2 maybe the same algorithm (i.e. you may shift to a different round in the same algorithm, both forwards and backwards )
+
+TITLE:
+Shifting 
+SUMMARY:
+
+TITLE:
+Algorithm B (shifting algorithm)
+SUMMARY:
+OLD
+NEW
+Algorithm A
+
+TITLE:
+Algorithm A (Update to Resolve)
+SUMMARY:
+Run information gathering for 3 rounds.
+Reorder the tree so that the leaves are the values received by the parent 
+Then the value of the parent is set to the result of resolve for its children
+i.e., the parent is given the majority value of its children or the values it received
+The result is a 2 level tree and we shift to round 2
+This repeats for T+1 rounds
+
+TITLE:
+Algorithm C
+SUMMARY:
+
+TITLE:
+Results 
+SUMMARY:
+Very cool idea and could have many applications (even outside distributed consensus or even distributed systems)
+Very toughly proved and supported 
+Not a very good explanation for why each algorithm has the tolerance it does
+Some what confusing presented (Algorithm B is presented before A)
+
+
+TITLE:
+Thoughts 
+SUMMARY:
+
+
+TITLE:
+Self-Stabilizing Byzantine Resilient Topology Discovery and Message Delivery
+SUMMARY:
+asynchronous networks 
+arbitrary connected topologies
+byzantine and crashing nodes
+2f+1 disjoint paths
+
+
+TITLE:
+System
+SUMMARY:
+Each node broadcasts it’s neighbors to it’s neighbors
+Then those neighbors attach themselves and broadcast it again 
+When a node receives f+1 vertex disjoint messages agreeing on the neighbors of a node
+From these a node can determine the neighborhood of all correct nodes
+
+TITLE:
+Algorithm
+SUMMARY:
+Algorithm is essentially the same as ones we have previously studied
+It’s self stabilizing to overcome temporary loss of 2f+1 disjoint paths to every node
+Exponential messages and memory for those messages
+
+TITLE:
+Results
+SUMMARY:
+
+
+TITLE:
+The Byzantine Generals Strike Again
+SUMMARY:
+arbitrary connected topologies which nodes know
+2t + 1 connectivity
+
+
+TITLE:
+System
+SUMMARY:
+A node gets it’s value and broadcasts it to it’s neighbors along with paths to send it through to get it to every node
+Then those neighbors send it along the path
+From these a node can determine the initial value of everyone
+Each node must then perform the above steps again for the values received. This is because a byzantine node may convince different nodes of different values flipping the majority. By doing this sharing all nodes now agree on the received values of all other peers (essentially Lamport through an incomplete topology)
+
+TITLE:
+Aglorithm
+SUMMARY:
+This takes number of byzantine nodes + diameter if 2 nodes are removed, number of rounds to complete
+Uses messages of exponential size
+
+
+TITLE:
+Results
+SUMMARY:
+
+
+TITLE:
+Fast Agreement in Networks with Byzantine Nodes
+SUMMARY:
+synchronous networks 
+arbitrary connected topologies
+byzantine and crashing nodes
+sometimes message authentication is used
+Each node is connected to at least 2 times the number of byzantine nodes or just the number of byzantine nodes
+
+TITLE:
+System
+SUMMARY:
+Each node gets it’s value and broadcasts it to it’s neighbors
+Then those neighbors attach themselves and broadcast it again doing so for a number of rounds equal to the number of byzantine nodes
+These final messages are then shared with everyone
+From these a node can determine the initial value of everyone and terminate accordingly
+
+
+TITLE:
+Idea
+SUMMARY:
+This takes number of byzantine nodes + diameter if 2 nodes are removed, number of rounds to complete
+Uses messages of exponential size
+
+
+TITLE:
+Results
+SUMMARY:
+
+Practical Multi-Candidate Election System
+Authors: O. Baudron , P.-A. Fouque , D. Pointcheval , G. Poupard , and J. Stern
+Presenter: Kendric Hood
+
+TITLE:
+
+SUMMARY:
+Notation
+Voter:  person that votes
+Local, Regional, and National Authority:  Government agencies that count votes
+Time Stamp Service:  3rd party that can guarantee that a given time stamp is valid
+
+Requirements
+Privacy:  authorities can not find out the value of a single vote
+Public Verifiability:  anyone can confirm that final tally
+Robustness:  some fault  tolerance (faulty authority)
+Anonymity:  votes are hidden
+Receipt-freeness:  no way to prove that a voter voted a certain way
+
+
+TITLE:
+System Requirements
+SUMMARY:
+All results are published on a public bulletin board. Anyone can view the board. 
+At the local level voters will edit their entry on the board 
+At the reginal level, each local authority acts as a voter, only now reporting the tally 
+At the National level, each reginal authority act as a voter reporting tallies  
+
+TITLE:
+Public
+SUMMARY:
+Votes are encrypted with a paillier cryptosystem. 
+Servers (Authority) generate a Public Key, Secret Key and a verification Key
+
+This is a distributed process, in order to decrypt a message all servers must give their decrypted version and then combine them 
+
+No one authority can decrypted votes
+
+Voters will vote once at each level. Authorities will compare votes to prove correctness. 
+
+
+
+TITLE:
+Robustness (Fault  Tolerance) 
+SUMMARY:
+Use of blind signatures 
+Each voter works with all the authorities to get a pseudonym that be used only once
+They can sign their vote with this pseudonym in a way that allows the authorities to verify that vote was cast by a legal voter and once but not who the vote actually belongs to. 
+
+
+TITLE:
+Anonymity/ Privacy
+SUMMARY:
+Voters cast their vote with the help of a trusted randomizer. 
+The randomizer will randomize the encryption so that the vote can not be verified without the help of the randomize. The voter gets the proof that their vote was cast the way they intended once and only once and then the randomize will no longer help in the verification process. 
+
+This is like a moment of privacy 
+
+TITLE:
+Receipt-freeness
+SUMMARY:
+Very much a crypto paper 
+Relatively simple
+
+
+TITLE:
+Thoughts
+SUMMARY:
+
+Round-Efficient Byzantine Broadcast under Strongly Adaptive andMajority Corruptions
+Authors: Jun Wa, Hanshen Xiao, 
+Srinivas Devadas, Elaine Shi
+Presented By: Kendric Hood
+
+TITLE:
+
+SUMMARY:
+Weak adaptive adversary: can view message sent then make corruption decisions 
+Strong adaptive adversary: can do after the fact remove of messages sent in the same round
+Peers have unique and unbreakable signatures (no sybil attack)
+
+TITLE:
+Notation
+SUMMARY:
+
+A subset of peers are selected into two committees (vote 0-committee or vote 1-committee)
+This election is done at random so the adversary can not know who is in which committee until that peer reveals it (votes)
+A peer's membership can be vivified with a given verifiable random value 
+The sender will broadcast its message
+If it is 0 then 0-committee will vote for it and 1-committee will not and visa versa
+An adversary would have to corrupt most of both committees to prevent this or “trick” peers listening 
+Sense committee membership is random the adversary would have to guess at membership (unlikely)
+Chan et al. Broadcast under Byzantine majority
+
+TITLE:
+
+SUMMARY:
+The main issue with Chan et al. is that if the adversary can do after the fact removal then it’s stagy is clear.
+Wait for a peer to vote, corrupt it, change its vote
+The adversary can only change messages sent in the same round as the corruption  
+Jun Wan address this issue directly 
+The problem 
+
+TITLE:
+
+SUMMARY:
+
+Solution time locking
+Jun Wan et al purpose a method of time locking each message with a computational difficult puzzle (think PoW) 
+Each committee member locks their random value (committee membership) and vote into a puzzle that takes at least one round to solve.
+This in effect restricts the adversary to a weaker one without after the fact removal
+Solving all puzzles
+A peer can not solve all puzzles by itself (does not scale each peer would have to have parallelism in the same scale as the network)
+Peers solve puzzles and share solutions (just as in PoW solutions can not be faked)  
+Takes a polylogarithmic number of rounds (called epic) to complete broadcast
+
+TITLE:
+
+SUMMARY:
+
+
+TITLE:
+A Modular Approach to Fault-Tolerant Broadcasts and Related Problems
+SUMMARY:
+Types of Network
+Message Passing
+Shared Memory
+Type of Communication
+Point to Point
+Broadcast
+Failures
+Crash
+Send/Receive/Channel
+Byzantine
+
+TITLE:
+Initial Definitions
+SUMMARY:
+Synchronous
+Known bound on time to execute a step
+Every process has local clock with known bound on drift
+Known bound on message delay
+Asynchronous if all of these are unknown
+Partial Synchrony if some of these are known but not all
+
+TITLE:
+Timing
+SUMMARY:
+All correct processes agree on the set of messages delivered
+All messages broadcast by correct processes are delivered
+No fake messages are delivered
+
+Note order is not necessary but is imposed on stronger broadcasts
+
+TITLE:
+Reliable Broadcast
+SUMMARY:
+Under certain conditions they are equivalent
+Atomic->Consensus. Assumes only benign failures (FLP)
+Consensus->Atomic. Assumes reliable and only crash failures
+Other transformations are possible with different conditions and assumptions
+
+TITLE:
+Relating Consensus and Broadcast
+SUMMARY:
+Similar idea but the network is configured into (possibly overlapping) groups
+Multicast broadcasts to a particular group rather than the whole network
+
+TITLE:
+Multicast
+SUMMARY:
+
+
+TITLE:
+Twins
+SUMMARY:
+Twin nodes are k nodes wrapped together that appear to valid nodes as a single node
+These nodes are byzantine
+They may ignore received messages
+They may send different messages to different nodes
+The network of nodes may be partitioned arbitrarily
+These partitions are “connected” via a twin
+The twins are not aware of the others behavior and thus behave byzantine
+
+TITLE:
+Twins System
+SUMMARY:
+The Twins algorithm can be leveraged to expose many known safety violations
+Safety attack on Zyzzyva
+Liveness attack on FaB
+Timing attack on Sync HotStuff
+Non-Responsiveness attack on linear leader-replacement
+The algorithm may not find safety violations relating to timing
+
+TITLE:
+Capabilities
+SUMMARY:
+Used LibraBFT for consensus
+Fed parameters that would produce bugs to evaluate Twins
+More than 1/3 byzantine
+Change rules of LibraBFT
+All possible test cases are generated-partition distributions, leader election, leader ordering
+This leads to a massive number of tests, especially as the number of nodes increases or the number of rounds
+
+TITLE:
+Tests
+SUMMARY:
+The Twins approach is an interesting way to test BFT algorithms
+It is not something that seems feasible on large scale although it can be run in parallel
+
+TITLE:
+Evaluation
+SUMMARY:
+
+
+TITLE:
+G-PBFT
+SUMMARY:
+Improves security by preventing sybil attacks
+Scalable
+Handle Churn
+
+TITLE:
+Claimed Contributions
+SUMMARY:
+All normal PBFT assumptions
+Different nodes cannot report the same geographic information at the same time
+Malicious nodes can not fake location data:
+all nodes of an IoT-blockchain application are located in a small physical area, other nodes can identify the fake locations reported by a malicious nodes. 
+For example, if there is no device in a specific position and geographic information reporting, it can be recognized as fake
+
+TITLE:
+Assumptions
+SUMMARY:
+Endorser – a node which participates in consensus 
+Client – a node which submits transactions
+Era – a specific configuration of the network of endorsers
+Geographic Timer – timer used to determine how long a node has remained stationary, also reset for an Endorser if it submits a block
+
+TITLE:
+Terms
+SUMMARY:
+There is a min & max for the number of Endorsers set in the genesis block
+Their geographic timer is used for block generation. 
+A longer time in the geographic timer will have a higher chance of generating a new block. 
+An IoT device that stays in a fixed location for a longer time represents a higher honesty, so they are given additional powers
+Can make special transactions which may:
+kick out an Endorser who moved
+suggest a client become an Endorser if it hasn’t moved for 72 hours
+
+
+TITLE:
+Endorser
+SUMMARY:
+Bootstrap
+Normal PBFT
+During PBFT Endorsers can submit special transactions which change the configuration of Endorsers
+Every T seconds an Era switch is performed which handles this churn
+
+TITLE:
+Algorithm
+SUMMARY:
+The proposed algorithm handles scalability by treating clients as part of the network of nodes, as they do not participate in consensus this lowers the communication overhead
+
+Sybil attacks are handled by only allowing stationary nodes to participate in consensus
+
+It’s an interesting idea but unrealistic to think nodes can’t fake their location data and this assumption is key to the algorithm
+
+TITLE:
+Ideas
+SUMMARY:
+
+TITLE:
+Latency
+SUMMARY:
+Auhtors: Quentin Bramas, Dianne Foreback, Mikhail Nesterenko, Sébastien Tixeuil
+Presenter: Kendric Hood
+
+TITLE:
+Packet Efficient Implementation of the Omega Failure Detector
+SUMMARY:
+Consensus can not be done in an asynchronous system and unbounded message delay. 
+A node can not tell if another has crashed or is simply slow. Leading to waiting forever.
+
+TITLE:
+Impossibility of Consensus with One Fault
+SUMMARY:
+A failure detector allows nodes to find crashed nodes, takes place of an Oracle.
+Relies on timeouts and can make mistakes
+Must have two properties 
+Completeness: There some point where every crashed node is detected
+Accuracy: There is a time where at least one node that is correct is not mistakenly marked crashed
+
+TITLE:
+Enter Failure Detectors
+SUMMARY:
+Every Nodes has a variable that keeps track of a leader.
+This leader must have timely reliable links to all other nodes.
+Only one nodes must have these links
+They can be only outbound
+After some time every node must agree that this is the leader 
+
+TITLE:
+Omega (failure detector in limited synchrony)
+SUMMARY:
+What if the leader does not have a single hop to all nodes?
+This is very unlikely
+Use a path instead (from leader to all other nodes instead)
+Relies on broadcasts
+
+TITLE:
+Packet Efficient Implementation of the Omega Failure Detector
+SUMMARY:
+Leader candidate estimates reliability of channels by building arboresence
+Arboresence: is a directed graph where from a root there is one path to every other node
+Each node attempts to be the leader at the start, then collect messages from other nodes and calculates the arboresence for each one. The Node with the lowest weighted arboresence is leader
+
+TITLE:
+Leader Election
+SUMMARY:
+Leader then sends alive messages to all nodes along the arboresence. 
+Sometimes these messages may be dropped (at some in between point)
+Nodes take turns broadcasting the leaders alive message
+This allows nodes that did not receive the message to send a failed message to the leader so that they may update there arboresence
+Then a node has a lower arboresence then the current leader then it becomes the leader
+
+TITLE:
+Leader change
+SUMMARY:
+Eventually one leader must become the permanent leader 
+This allows the algorithm to fit the definition of Failure Detectors 
+
+TITLE:
+Fitting into Failure Detectors 
+SUMMARY:
+Authors:
+Ittai Abraham T-H. Hubert Chan Danny Dolev Kartik Nayak Rafael Pass, Ling Ren, and Elaine Shi 
+Presenter: Kendric Hood
+
+TITLE:
+Communication Complexity of Byzantine Agreement, Revisited 
+SUMMARY:
+There is a communication lower bound of Ω(f2) when After the Fact removal is present (in randomized protocals) 
+Near-Optimal subquadratic Byzantine Agreement  
+
+
+
+TITLE:
+Two Major Contributions 
+SUMMARY:
+After the fact removal is when an honest Node A sends a messages in round R
+Then in R+1 A is corrupted, and can remove it’s message from round R and even replace it with a different message.  
+
+
+TITLE:
+After the fact removal 
+SUMMARY:
+This works in a Byzantine Broadcast setting
+One Node (the sender) Receives a bit [1,0] and then must propagate this bit to all other nodes in the network.
+All honest nodes should output the same bit
+
+
+TITLE:
+There is a communication lower bound of Ω(f2) 
+SUMMARY:
+Suppose there are two adversaries A1 and A2. A1 corrupts a set V of Nodes such that V = F/2. These Nodes preform honestly except 
+They ignore the first f/2 messages they receive 
+They will never send a messages to another Node in V
+All other Nodes are honest and in set U including the sender
+
+TITLE:
+There is a communication lower bound of Ω(f2) cont.
+SUMMARY:
+If (f/2)2 messages are sent to V then at lest one node (P) in V must have gotten f/2 messages. A2 simply corrupts these nodes (for a total of F Byzantine nodes) and prevents them from sending to P. 
+Now assume all of the above but the input bit is 0 and if an honest node does not receive any input it will output 1, thus all nodes expect P will output 0 and P will output 1
+
+TITLE:
+Adversaries A2
+SUMMARY:
+The Authors disallow after the fact removal and rely on cryptographic and setup assumptions
+The authors also use verifiable randomness and a memory-eraser model.  
+
+TITLE:
+Near-Optimal subquadratic Byzantine Agreement  
+SUMMARY:
+A node is selected at random to be the leader (via mining to propose)
+Then log(k) (where k is a security parameter) nodes are selected to vote on the purposed value. 
+With 
+memory-eraser model 
+disallowing after the fact removal 
+Randomness 
+An adversary gains no advantage in corrupting a node that has already voted and can not predict which nodes will vote for the next purposed value. Thus they are reduced to guessing.
+
+
+TITLE:
+Basics of the algorithm 
+SUMMARY:
+
+TITLE:
+Thoughts
+SUMMARY:
+
+
+TITLE:
+RapidChain
+SUMMARY:
+Improves the scalability and security.
+Adaptive Byzantine tolerance of 1/3.
+
+
+TITLE:
+Claims
+SUMMARY:
+All committees are less than ½ corrupt the entire time.
+Synchronous communication 
+
+
+TITLE:
+Assumptions
+SUMMARY:
+This phase is only ran once.
+In this phase the nodes elect their root committee via subgroup elections.
+The root group then selects the reference committee.
+Finally, the reference committee randomly sorts the other nodes into committees which are less than ½ corrupt.
+
+TITLE:
+Bootstrap Phase
+SUMMARY:
+A transaction is submitted to some nodes who route the transaction to the output committee.
+The output committee verifies the transactions for a block and appends it to their chain when they all agree using a gossip protocol.
+The gossip protocol breaks the block into pieces for speed.
+This limits a committee to be less than ½ corrupt.
+
+TITLE:
+Consensus phase
+SUMMARY:
+At each iteration each committee picks a leader randomly
+An iteration consists of 4 synchronous rounds
+1. The leader gossips a message
+2. The nodes gossip again with an echo tag
+3. If leader sent different messages to nodes, nodes tag as pending and gossip again
+4. If a node received over ½ good gossips with a single header it accepts and gossips it again with proof
+
+TITLE:
+Consensus Details
+SUMMARY:
+Nodes remember temporary and permanent votes for blocks through iterations.
+Temporary votes are the last echoed block, a permanent vote is a node’s acceptance of a block
+Cross-Shard Transactions are performed as follows: a transaction has two inputs A, B and one output O. If A and B belong to committees other than the output committee the leader of Cout creates three new transactions the first two move A and B to Cout and the third performs the original transaction.
+
+
+TITLE:
+Consensus Details Continued
+SUMMARY:
+When an Epoch ends the reference committee must:
+reorganize the committees with a new randomization,
+and check proof of works of any node who wishes to participate in the new epoch.
+These proof of works take roughly 10 minutes and establish a nodes identity preventing Sybil attacks (adversary with many identities)
+
+
+
+TITLE:
+Reconfiguration Phase
+SUMMARY:
+We simulate networks of up to 4,000 nodes by oversubscribing a set of 32 machines each running up to 125 RapidChain instances. Each machine has a 64-core Intel Xeon Phi 7210 @ 1.3GHz processor and a 10-Gbps communication link
+During consensus epochs, nodes communicate through much smaller P2P overlays created within every committee, where each node accepts up to 16 outgoing connections and up to 125 incoming connections.
+The leader gossips two different messages in the same iteration with probability 0.49. Also, in our inter-committee routing protocol, 49% of the nodes do not participate in the gossip protocol (i.e., remain silent).
+we set ∆ (see Section 3 for the definition) conservatively to 600 ms based on the maximum time to gossip an 80-byte digest to all nodes in a P2P network of 250 nodes
+We assume each block of transaction consist of 4,096 transactions, where each transaction consists of 512 bytes resulting in a block size of 2 MB.
+
+TITLE:
+Experiment
+SUMMARY:
+The 1/3-1/2 assumption. They never discuss why 1/3 is chosen or where it comes from. 
+The network has no means of creating new committees. Their sizes will grow as new nodes join the network but the number of committees will always stay the same limiting their throughput unnecessarily.
+
+TITLE:
+Issues
+SUMMARY:
+“In RapidChain, we use a variant of the synchronous consensus protocol of Ren et al. [60] to achieve optimal resiliency of f < 1/2 in committees and hence, allow smaller committee sizes with higher total resiliency of 1/3 (than previous work [47, 42]).”
+1/3 is chosen to decrease committee sizes. It seems to be relatively arbitrary. Most likely the number was chosen, then using the probability a committee is majority corrupt, a committee size was chosen that provides a low failure rate.
+
+TITLE:
+1/3 and 1/2 comments
+SUMMARY:
+Presented by Mark Gardner
+
+TITLE:
+Elastico
+SUMMARY:
+Proposes increased computation power with near linear increase in transactions
+Tolerates up to 25% byzantine failures
+Uses sharding. 
+
+TITLE:
+Proposed benefits
+SUMMARY:
+Can tolerate f < n/4 adversaries
+Network is sharded into committees made up of c nodes
+Within committee message complexity is O(c^2 to c^3)
+Overall yield of O(nc^3)
+
+TITLE:
+Performance scaling
+SUMMARY:
+1. Each node generates identity using public key, IP address, and proof-of-work	- This helps to limit number of malicious identities
+2. Each node broadcasts identity to at most size of committee – Helps to limit number of broadcasts
+3. Committees use standard byzantine agreement such as PBFT.
+
+TITLE:
+How algorithm works
+SUMMARY:
+4. A small final committee exists to compute the outputs of the smaller smaller committees.
+5. Final committee broadcasts random values to be used in next epoch for proof-of work.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TITLE:
+How algorithm works
+SUMMARY:
+Seed for proof-of-work is generated in previous epoch
+Each node looks for nonce is  
+
+D is based on difficulty setup by network
+H produces gamma
+Committee selection is based on last 2^s bits of
+ID. - Helps to keep adversary from biasing committee
+
+TITLE:
+Identity Setup
+SUMMARY:
+To decrease number of messages setup, a committee is setup to serve as directories.
+Node only receives directory of nodes in its committee.
+To prevent receiving malicious directory info,node takes union of received directory information
+May have discrepancy at most c/2.
+
+TITLE:
+Committee Setup
+SUMMARY:
+(as previously discussed, committee consensus is based on byzantine agreement protocol)
+Final committee validates values received are signed by at least c/2 +1 members, and creates union of all inputs.
+Uses same algorithm, get signed by at least c/2 +1 members, entire network can verify on broadcast.
+Next seed is generated by random function based on hash values sent by final committee
+
+TITLE:
+Final Consensus
+SUMMARY:
+Assumptions made:
+Partially synchronous network, any message can reach destination with a max delay.
+Each epoch depends on sufficiently random strings generated in previous epoch
+Definition of good randomness, each user has a publicly random string; No user has access prior to start of epoch (within network delay); malicious user biases is negligible
+
+TITLE:
+Security Analysis
+SUMMARY:
+OmniLedger criticizes Elastico’s small shard sizes has a 2.76% failure rate under 25% adversary power.
+Shard selection is not strongly bias-resistant
+Miners can discard proof-of-work to bias results
+Elastico does not ensure atomicity across shards
+Latency is about 10 minutes.
+
+TITLE:
+Security Analysis
+SUMMARY:
+
+
+TITLE:
+Graphs
+SUMMARY:
+Elastico aims to increase scalability of block chain
+Has security concerns
+Large communication overhead
+Has similar latency to bitcoin
+Omniledger, Rapidcoin were designed as improvement  
+
+TITLE:
+Conclusion
+SUMMARY:
+(Elastico)A Secure Sharding Protoco for Open Blockchains. Luu, et al. https://loiluu.com/papers/elastico.pdfl 
+OmniLedger: A secure, Scale-Out, Decentralized ledger vis Sharding, Kokoris-Kogias et al. https://eprint.iacr.org/2017/406.pdf 
+
+TITLE:
+References
+SUMMARY:
+Eleftherios Kokoris-Kogias†, Philipp Jovanovic†, Linus Gasser†,
+Nicolas Gailly†, Ewa Syta∗, Bryan Ford†
+
+†École Polytechnique Fédérale de Lausanne, Switzerland
+∗Trinity College, USA
+
+Presented by Kyle Pugh
+
+TITLE:
+OmniLedgerA Secure, Scale-Out, Decentralized Ledger via Sharding
+SUMMARY:
+Scalability of distributed ledgers (DLs) does not improve with added participants and gradually decreases with added overhead.
+Choose statistically representative groups of validators (shards) for sybil-resistant PoW or PoS, and ensure a negligible probability that any shard is compromised over the system lifetime but is also sufficiently large and bias-resistant.
+Correctly and atomically handle cross-shared transactions that affect the ledger state of two or more distinct shards.
+Use distributed checkpointing to help new or long offline participants catch up to the current state without having to download and verify the entire DL history.
+Support an optional “trust-but-verify” two-tier approach that allows low-value transactions to be verified quicker by a smaller, faster first-tier which is then reverified by a slower but larger second-tier to ensure long-term security. Misbehavior in the first-tier can be quickly detected and disincentivized by the second-tier.
+
+
+
+TITLE:
+Proposed Problems
+SUMMARY:
+OmniLedger uses sharding to “scale-out” horizontally with the number of participants without sacrificing security or permissionless decentralization. Reducing the processing load on each validator and increasing the system processing capacity proportionally to the number of participants.
+Use ByzCoinX, a BFT consensus protocol to increase performance and robustness against DoS attacks.
+Use Atomix, an atomic commit protocol to commit transactions atomically across shards.
+Use state blocks to minimize storage and update overhead.
+Optionally, use two-tier “trust-but-verify” processing to minimize latency of low-value transactions.
+
+TITLE:
+Proposed Solutions
+SUMMARY:
+Full decentralization OmniLedger does not have any single points of failure (such as trusted third parties).
+Shard robustness Each shard correctly and continuously processes transactions assigned to it.
+Secure transactions Transactions are committed atomically or eventually aborted, both within and across shards.
+Scale-out The expected throughput of OmniLedger increases linearly in the number of participating validators.
+Low storage overhead Validators do not need to store the full transaction history but only a periodically computed reference point that summarizes a shard’s state.
+Low latency OmniLedger provides low latency for transaction confirmations.
+
+
+TITLE:
+Proposed Goals
+SUMMARY:
+To prevent deterministic selection that an adversary may use to cause failures, use RandHound and VRF-based leader election for trusted randomness beacon.
+Validators must register their sybil-resistance identity in the global identity chain during epoch e – 1 to be considered as a validator in epoch e. Each validator broadcasts an identity with respective proofs on the gossip network at most ∆ before epoch e − 1 ends.
+At the beginning of an epoch e, each validator computes a ticket ticketi,e,v = VRFski(“leader” ∥ confige ∥ v) where confige is the configuration containing all properly registered validators of epoch e and v is a view counter. Validators then gossip these tickets with each other for a time ∆, after which they lock in the lowest-value valid ticket they have seen thus far and accept the corresponding node as the leader of the RandHound protocol run. If the elected node fails to start RandHound within another ∆, validators consider the current run as failed and ignore this validator for the rest of the epoch. In this case, the validators increase the view number to v + 1 and re-run the lottery.
+The leader broadcasts rnde together with its correctness proof, each of the n properly registered validators can first verify and then use rnde to compute a permutation πe of 1, . . . , n and subdivide the result into m approximately equally-sized buckets, thereby determining its assignment of nodes to shards.
+
+TITLE:
+Sharding via Bias-Resistant Distributed Randomness
+SUMMARY:
+Gradually swap in new validators to each shard per epoch.
+To achieve this continued operation we can swap-out at most 1/3 of the shard’s size (≈n/m), however the bigger the batch is, the higher the risk gets that the number of remaining honest validators is insufficient to reach consensus and the more stress the bootstrapping of new validators causes to the network.
+Fix a parameter k < n/3m specifying the swap-out batch, the number of validators that are swapped out at a given time. OmniLedger works in batches of k = log(n/m). For each shard j, we derive a seed H(j ∥ rnde) to compute a permutation πj,e of the shard’s validators, and we specify the permutation of the batches. We also compute another seed H(0 ∥ rnde) to permute and scatter the validators who joined in epoch e and to define the order in which they will do so (again, in batches of size k). After defining the random permutations, each batch waits ∆ before starting to bootstrap in order to spread the load on the network.
+
+TITLE:
+Maintaining Operability During Epoch Transitions
+SUMMARY:
+Byzantine Shard Atomic Commit (Atomix) protocol for atomically processing transactions across shards, such that each transaction is either committed or eventually aborted.
+
+TITLE:
+Cross-Shard Transactions
+SUMMARY:
+To achieve better fault tolerance in OmniLedger, without resorting to a PBFT-like all-to-all communication pattern, we introduce for ByzCoinX a new communication pattern that trades-off some of ByzCoin’s high scalability for robustness, by changing the message propagation mechanism within the consensus group to resemble a two-level tree.
+During the setup of OmniLedger in an epoch, the generated randomness is not only used to assign validators to shards but also to assign them evenly to groups within a shard. The number of groups g, from which the maximum group size can be derived by taking the shard size into account, is specified in the shard policy file.
+At the beginning of a ByzCoinX roundtrip, the protocol leader randomly selects one of the validators in each group to be the group leader responsible for managing communication between the protocol leader and the respective group members. If a group leader does not reply before a predefined timeout, the protocol leader randomly chooses another group member to replace the failed leader. As soon as the protocol leader receives more than 2/3 of the validators’ acceptances, he proceeds to the next phase of the protocol. If the protocol leader fails, all validators initiate a PBFT-like view-change procedure.
+
+TITLE:
+Fault Tolerance under Byzantine Faults
+SUMMARY:
+Transactions that do not conflict with each other can be committed in different blocks and consequently can be safely processed in parallel. To identify conflicting transactions, we need to analyze the dependencies that are possible between transactions.
+Let txA and txB denote two transactions. Then, there are two cases that need to be carefully handled: (1) both txA and txB try to spend the same UTXO and (2) an UTXO created at the output of txA is spent at the input of txB (or vice versa). To address (1) and maintain consistency, only one of the two tx can be committed. To address (2), txA has to be committed to the ledger before txB, txB has to be in a block that depends (transitively) on the block containing txA. All transactions that do not exhibit these two properties can be processed safely in parallel.
+To capture the concurrent processing of blocks, adopt a block-based directed acyclic graph (blockDAG) as a data structure, where every block can have multiple parents.
+The ByzCoinX protocol leader enforces that each pending block includes only non-conflicting transactions and captures UTXO dependencies by adding the hashes of former blocks (backpointers) upon which a given block’s transactions depend. To decrease the number of such hashes, we remark that UTXO dependencies are transitive, enabling us to relax the requirement that blocks have to capture all UTXO dependencies directly. Instead, a given block can simply add backpointers to a set of blocks, transitively capturing all dependencies.
+
+TITLE:
+Parallelizing Block Commitments
+SUMMARY:
+The issues of an ever-growing ledger and the resulting costly bootstrapping of new validators is particularly urgent for high-throughput DL systems. For example, whereas Bitcoin’s blockchain grows by ≈ 144 MB per day and has a total size of about 133 GB, next-generation systems with Visa-level throughput (e.g., 4000 tx/sec and 500 B/tx) can easily produce over 150 GB per day.
+To reduce the storage and bootstrapping costs for validators, state blocks that are similar to stable checkpoints in PBFT summarize the entire state of a shard’s ledger. To create a state block sbj,e for shard j in epoch e, the shard’s validators execute the following steps:
+At the end of e, the shard’s leader stores the UTXOs in an ordered Merkle tree and puts the Merkle tree’s root hash in the header of sbj,e.
+The validators run consensus on the header of sbj,e and, if successful, the leader stores the approved header in the shard’s ledger making sbj,e the genesis block of epoch e + 1.
+Finally, the body of sbj,e−1 (UTXOs) can be discarded safely. Keep the regular blocks of epoch e, however, until after the end of epoch e + 1 for the purpose of creating transaction proofs.
+
+TITLE:
+Shard Ledger Pruning
+SUMMARY:
+As OmniLedger’s state is split across multiple shards and as we store only the state blocks’ headers in a shard’s ledger, a client cannot prove the existence of a past transaction to another party by presenting an inclusion proof to the block where the transaction was committed.
+The responsibility of storing transactions’ proofs-of-existence falls to the clients of OmniLedger. During epoch e + 1 clients can generate proofs-of-existence for transactions validated in epoch e using the normal block of epoch e and the state block. Such a proof for a given transaction tx contains the Merkle tree inclusion proof to the regular block B that committed tx in epoch e and a sequence of block headers from the state block sbj,e at the end of the epoch to block B. To reduce the size of these proofs, state blocks can include several multi-hop backpointers to headers of intermediate (regular) blocks.
+
+TITLE:
+Shard Ledger Pruning (continued)
+SUMMARY:
+The design of OmniLedger favors security over scalability, pessimistically assume an adversary who controls 25% of the validators and, accordingly, choose large shards at the cost of higher latency but guarantee the finality of transactions. This assumption, however, might not appropriately reflect the priorities of clients with frequent, latency-sensitive but low-value transactions and who would like to have transactions processed as quickly as possible.
+
+TITLE:
+Optional Trust-but-Verify Validation
+SUMMARY:
+There are many instances where the authors make an assumption and never prove or qualify that it is true or even possible (I think more than 20).
+There is no comparison of the usage of cross-shard transactions, which will inevitably increase in likelihood as the system grows and enters each additional epoch. Yet, the paper claims that it can handle this at scale. Since these are atomic operations, this would seem to cause a bottleneck which byzantine leaders could exploit to deny transactions, increasing the bottleneck.
+The pruning of the ledger allows for less traffic but requires that the client perform more computations in order to confirm transactions from previous epochs. Does this allow a client to manipulate whether these transactions are correctly verified if they are byzantine in interacting with a third party? There also seems to be a trade-off of obtaining the DL history and the computations required to verify that it is valid.
+The paper is confusing because they present an incorrect strawman algorithm first, which makes it difficult to determine which parts, if any, of that algorithm is used.
+
+TITLE:
+Conclusions
+SUMMARY:
+Ren et. al.
+
+TITLE:
+Practical Synchronous Byzantine Consensus
+SUMMARY:
+Synchronous
+Authenticated (digital signatures)
+2f + 1 Byzantine fault tolerance
+Amortized cost of 4 to 8 rounds per slot
+Handle non-simultaneous termination
+
+
+TITLE:
+Byzantine consensus for
+SUMMARY:
+The leader learns the states of the system
+
+TITLE:
+Round 0 (status)
+SUMMARY:
+the leader proposes a safe value, and
+
+TITLE:
+Round 1 (propose)
+SUMMARY:
+Every replica sends a commit request to every other replica. If a replica receives f + 1 commit requests for the same value, it commits on that value.
+
+TITLE:
+Round 2 (commit)
+SUMMARY:
+If a replica commits, it notifies all other replicas about the commit.
+
+TITLE:
+Round 3 (notify)
+SUMMARY:
+Eleftherios Kokoris-Kogias† , Philipp Jovanovic† , Linus Gasser† , Nicolas Gailly† , Ewa Syta∗ , Bryan Ford†
+†Ecole Polytechnique F ´ ed´ erale de Lausanne, Switzerland, ´ ∗Trinity College, USA
+
+TITLE:
+OmniLedger: A Secure, Scale-Out, Decentralized Ledger via Sharding
+SUMMARY:
+Introduce the first DL architecture that provides horizontal scaling without compromising either long-term security or permissionless decentralization.
+Atomix, a Atomic Commit protocol, to commit transactions atomically across shards.
+ByzCoinX, a BFT consensus protocol that increases performance and robustness to DoS attacks.
+state blocks, that are deployed along OmniLedger to minimize storage and update overhead.
+two-tier trust-but-verify processing to minimize the latency of low-value transactions.
+
+TITLE:
+Proposal (OmniLedger)
+SUMMARY:
+OmniLedger has the following primary goals with respect to decentralization, security, and scalability
+Full decentralization. OmniLedger does not have any single points of failure (such as trusted third parties). 
+Shard robustness. Each shard correctly and continuously processes transactions assigned to it. 
+Secure transactions. Transactions are committed atomically or eventually aborted, both within and across shards. 
+Scale-out. The expected throughput of OmniLedger increases linearly in the number of participating validators. 
+Low storage overhead. Validators do not need to store the full transaction history but only a periodically computed reference point that summarizes a shard’s state. 
+Low latency. OmniLedger provides low latency for transaction confirmations.
+
+TITLE:
+System Goals
+SUMMARY:
+Validators have to first register to a global identity blockchain. They create their identities through a Sybil-attack-resistant mechanism in epoch e−1 and broadcast them, together with the respective proofs, on the gossip network at most ∆(delay for honest nodes) before epoch e − 1 ends. 
+Epoch e begins with a leader, elected using randomness rnde−1, who requests from the already registered and active validators a (BFT) signature on a block with all identities that have been provably established so far. If at least 2/3 of these validators endorse the block, it becomes valid, and the leader appends it to the identity blockchain. Afterwards, all registered validators take rnde to determine their assignment to one of the shards and to bootstrap their internal states from the shards’ distributed ledgers. 
+The random shard assignment ensures that the ratio between malicious and honest validators in any given shard closely matches the ratio across all validators with high probability
+Security design: Sharding via Bias-Resistant Distributed Randomness
+
+TITLE:
+Use RandHound and VRF-based leader election to act as a trusted randomness beacon.
+SUMMARY:
+Can swap-out at most 1/3 of the shard’s size(n/m), however the bigger the batch is, the higher the risk gets that the number of remaining honest validators is insufficient to reach consensus and the more stress the bootstrapping of new validators causes to the network.
+For OmniLedger, swap-out batch(the number of validators that are swapped out at a given time) work in batches of k = log (n/m) . Then for each shard j, we derive a seed H(j ∥ rnde) to compute a permutation πj,e of the shard’s validators, and we specify the permutation of the batches. Then compute another seed H(0 ∥ rnde) to permute and scatter the validators who joined in epoch e and to define the order in which they will do so (again, in batches of size k). After defining the random permutations, each batch waits ∆ before starting to bootstrap in order to spread the load on the network. Once a validator is ready, he sends an announcement to the shard’s leader who then swaps the validator in.
+Security design: Maintaining Operability During Epoch Transitions
+
+TITLE:
+ OmniLedger gradually swaps in new validators to each shard per epoch. This enables the remaining operators to continue providing service (in the honest scenario) to clients while the recently joined validators are bootstrapping.
+SUMMARY:
+ a novel Byzantine Shard Atomic Commit (Atomix)
+
+TITLE:
+Security design: Cross-Shard Transactions
+SUMMARY:
+
+TITLE:
+Architecture Overview
+SUMMARY:
+
+In the event of a failure, ByzCoin falls back on all-to-all communication pattern, similar to PBFT.
+ByzCoinX a new communication pattern that trades-off ByzCoin’s high scalability for robustness, changing the message propagation mechanism within the consensus group to resemble a two-level tree.
+During the setup of OmniLedger in an epoch, the generated randomness is not only used to assign validators to shards but also to assign them evenly to groups within a shard. The number of groups g, from which the maximum group size can be derived by taking the shard size into account, is specified in the shard policy file. 
+At the beginning of a ByzCoinX roundtrip, the protocol leader randomly selects one of the validators in each group to be the group leader responsible for managing communication between the protocol leader and the respective group members. If a group leader does not reply before a predefined timeout, the protocol leader randomly chooses another group member to replace the failed leader. As soon as the protocol leader receives more than 2/3 of the validators’ acceptances, he proceeds to the next phase of the protocol. If the protocol leader fails, all validators initiate a PBFT-like view-change procedure.
+
+TITLE:
+Fault Tolerance under Byzantine Faults
+SUMMARY:
+To capture the concurrent processing of blocks, adopt a block-based directed acyclic graph (blockDAG) [33] as a data structure, where every block can have multiple parents. 
+The ByzCoinX protocol leader enforces that each pending block includes only non-conflicting transactions and captures UTXO dependencies by adding the hashes of former blocks (i.e., backpointers) upon which a given block’s transactions depend. To decrease the number of such hashes, they remark that UTXO dependencies are transitive, enabling the relaxation of the requirement that blocks have to capture all UTXO dependencies directly. Instead, a given block can simply add backpointers to a set of blocks, transitively capturing all dependencies.
+
+TITLE:
+Parallelizing Block Commitments
+SUMMARY:
+state blocks to reduce the storage and bootstrapping costs for validators (whose shard assignments might change periodically) that summarize the entire state of a shard’s ledger. 
+To create a state block sbj,e for shard j in epoch e, the shard’s validators execute the following steps: 
+At the end of e, the shard’s leader stores the UTXOs in an ordered Merkle tree and puts the Merkle tree’s root hash in the header of sbj,e. Afterwards, the validators run consensus on the header of sbj,e (note that each validator can construct the same ordered Merkle tree for verification) and, if successful, the leader stores the approved header in the shard’s ledger making sbj,e the genesis block of epoch e + 1. Finally, the body of sbj,e−1 (UTXOs) can be discarded safely. 
+keep the regular blocks of epoch e, however, until after the end of epoch e+ 1 for the purpose of creating transaction proofs.
+
+TITLE:
+Shard Ledger Pruning
+SUMMARY:
+As OmniLedger’s state is split across multiple shards and as we store only the state blocks’ headers in a shard’s ledger, a client cannot prove the existence of a past transaction to another party by presenting an inclusion proof to the block where the transaction was committed. 
+move the responsibility of storing transactions’ proofs-of-existence to the clients of OmniLedger.
+During epoch e + 1 clients can generate proofs-of-existence for transactions validated in epoch e using the normal block of epoch e and the state block
+
+TITLE:
+Shard Ledger Pruning
+SUMMARY:
+
+TITLE:
+Optional Trust-but-Verify Validation
+SUMMARY:
+Loi Luu, Viswesh Narayanan, Chaodong Zheng,Kunal Baweja, Seth Gilbert, Prateek Saxena
+
+TITLE:
+A Secure Sharding Protocol For Open Blockchains
+SUMMARY:
+Decentralized system like Bitcoin’s transaction throughput does not scale well.
+Solutions which use classical Byzantine consensus protocols do not work in an open environment like cryptocurrencies because:
+They assume that the network nodes have pre-established identities or public-key infrastructure in place.
+Practical Byzantine consensus protocols such as PBFT require at least a quadratic number of messages in the number of participants, thus they are bandwidth limited
+
+
+
+TITLE:
+Problems
+SUMMARY:
+Achieves a sweet spot between classical byzantine consensus protocols and Nakamoto consensus protocol.
+First secure candidate for a sharding protocol for open blockchains that tolerates byzantine adversaries. 
+Increases the blockchain’s transaction throughput almost linearly with the computational power of the network.
+Proof of concept through an idealized network simulation on Amazon EC2, ranging up to 1600 network nodes, confirms a near linear scalability for ELASTICO.
+
+
+TITLE:
+Proposal (ELASTICO)
+SUMMARY:
+A protocol which has the following properties
+Agreement: Honest processors agree on a X (set of shards) with a high probability of at least 1 - 2-λ for some security parameter λ.
+Validity: The agreed shard (X) satisfies specified constraint function to determine the validity of each transaction.
+Scalability: The value of k grows linearly with the size of the network (or n).
+Efficiency: The computation and bandwidth used per processor stays constant regardless of n and k.
+Agreement: Relaxation of the original byzantine consensus problem. They allow the honest processors to be in “probabilistic agreement”.
+
+TITLE:
+Problem Definition
+SUMMARY:
+Sharding in a permission-less blockchain with the presence of byzantine adversary:
+Processors have no inherent identities or external PKI to trust.
+Once identities are established, the next challenge is to run a sharding protocol among the identities with a fraction f of them are byzantine. The goal is to uniformly split all identities into several committees with a condition that each committee has the majority as honest with high probability.
+Must ensure that an adaptive adversary observing all the protocol runs, does not gain significant advantage in biasing its operations or creating sybil identities.
+
+TITLE:
+Challenges
+SUMMARY:
+The algorithm proceeds in epochs, at each epoch
+Identity Establishment and Committee Formation
+Overlay Setup for Committees
+Intra-committee Consensus
+Final Consensus Broadcast
+Epoch Randomness Generation
+
+TITLE:
+ELASTICO DESIGN
+SUMMARY:
+In each epoch, for f = 1/4, the protocol guarantees the following security properties S1–S5
+Given a security parameter λ,there exists n0 such that ∀n0 ≥ n0, among the first n0 identities created, at most 1/3 are malicious w.h.p.
+After step 2, all committee members have their own view of at least c members in the committee.
+For each committee, Step 3 yields a consensus on the set of transactions proposed by members in the committee.
+Step 4 yields a valid set of transactions X which combines all proposed Xi from other committees.
+Step 5 will yield a set of random r-bit values with sufficient randomness.
+
+TITLE:
+ELASTICO DESIGN (Security)
+SUMMARY:
+
+Each processor locally chooses its own identity of the form (IP, PK), which are public key and IP address respectively for the authenticated communication later.
+Processors must find a PoW solution corresponding to its chosen identity. As a “seed” for the PoW, we need a public random string epochRandomness generated at the end of the previous epoch to ensure that the PoW was not precomputed.
+Specifically, each processor locally searches for a valid nonce that satisfies the following constraint:
+
+The last s bits of O specifies which (s-bit) committee id that the processor belongs to. Each committee will process a separate set of values (e.g., a shard) based on this s-bit ID.
+
+
+
+TITLE:
+Identity Establishment and Committee Formation
+SUMMARY:
+The directory committee is simply a committee of the first c identities. 
+They allow committee members (including directory members) to have different views of the member set, a challenge that most previous BFT protocols do not face. Their protocol can tolerate this discrepancy and show that all honest members have others’ identities in their view.
+The overlay setup has O(nc) message complexity.
+Malicious directories cannot create new identities or change committee assignment of new identities due to the PoW.
+ 2.	Overlay Setup for Committees
+
+
+TITLE:
+To reduce the number of broadcast messages, we have a special committee of size c to serve as a set of “directories."
+SUMMARY:
+
+After Step 2, In the worst case, each committee has 3c/2 members, of which at most 1/3 of them are malicious. Since all the honest members have identities of other honest members in their views, any existing non-leader-based byzantine agreement protocols will work securely.
+Once an agreement is reached, the selected transaction set is signed by at least c/2+1 signatures to guarantee some honest member has verified and accepted the value.
+Each committee member then sends the signed value along with the signatures to the final committee (using the directory, again, to acquire the list of final committee members)
+The final committee can verify that a certain value is the selected one by checking that it has sufficient signatures. 
+
+TITLE:
+3.	Intra-committee Consensus
+SUMMARY:
+
+The next step of the protocol is to merge the agreed values of committees and to create a cryptographic digest (a digital signature) of the final agreed result.
+ A final committee (which includes all members with a fixed s-bit committee id) is designated to perform this step)
+The merge function is simple: each final committee member validates that the values received from the committees are signed by at least c/2 + 1 members of the proper committee, and takes the ordered set union of all inputs.
+This step obtains a verifiable signature by at least c/2 + 1 members of the final committee, which the entire network can verify upon broadcast.
+
+TITLE:
+4.	Final Consensus Broadcast
+SUMMARY:
+In the final step of the protocol, the final committee (or consensus committee) also generates a set of random strings for use in the next epoch.
+These random strings are used as the seed for the PoW in the next epoch.
+
+TITLE:
+5.	Epoch Randomness Generation
+SUMMARY:
+Authors: Mahdi Zamani, Mahnush Movahedi, Mariana Raykova
+Presented by: Kendric Hood 
+
+TITLE:
+RapidChain: Scaling Blockchain via Full Sharding 
+SUMMARY:
+Boot Strapping 
+Consensus (PBFT)
+Reconfiguration (Cuckoo rule)
+
+TITLE:
+Steps in The Protocol 
+SUMMARY:
+Relies on a hard coded seed in all peers and a known network size.
+Selects a reference committee 
+Reference committee then generates a random series of bits that nodes use to establish identities. 
+These identities are then used to determine which committee the peer is apart of.
+Each committee is of size O(log(n)) 
+
+
+TITLE:
+Boot Strapping
+SUMMARY:
+The leader of the committee will prose a new block
+Then each committee member will gossip what they have hard
+If the committee members hear ½ +1 of the same block that block is selected as the new block. Otherwise they land on a “safe value”
+If a block is pending (not agreed upon by the end of the consensus) then it is carried over to the next consensus
+
+TITLE:
+Consensus
+SUMMARY:
+In this period committee members are shuffled around and new members are allowed to be added.
+Not all peers will change committees, but enough will change to Guarantee the ½ tolerance to byzantine peers
+They use the “Cuckoo rule” to move peers around and add new peers 
+
+
+TITLE:
+Reconfiguration 
+SUMMARY:
+Transactions are disturbed uniformly and at random to committees
+This means that transaction will almost always rely on transactions in other committees to confirm the presence of available funds.
+They move money to the committee that the new transaction is apart of with a series of transactions, one for each transaction that is on a different committee, and ensure that this transaction is routed to the committee that the new transaction is apart of. 
+
+TITLE:
+Cross shard transactions
+SUMMARY:
+
+Vite: A High Performance Asynchronous Decentralized Application Platform
+
+TITLE:
+
+SUMMARY:
+Vite is a universal dApp platform that can support a set of smart contracts, each of which is a state machine with independent state and different operational logic, which can communicate by message delivery.
+
+Rule: 1- the system is a transactional state machine, 2- The state of the system is the world state 3- The world state consists of is composed of the state of each independent account.  4- Transactions is events that cause changes in account status
+Some Important Definitions:
+Definition 1.1 (Transactional State Machine):a transactional state machine is a 4-tuple: (T,S,g,§), where T is a set of transactions,
+S is a set of states, g€ S is initial state (genesis block),and § is state transaction function.
+Definition 1.2 (Semantics of Transactional State Machine):The semantics of a transactional state machine is a discrete transition system.
+Definition 1.3 (Ledger): ledger is composed of a set of transactions, with an abstract data type recursively constructed. Ledgers are
+usually used to represent a group of transactions
+Fork: According to the same group of transactions, different valid books can be constructed, but they represent a different order of transactions and may cause the system to enter a different state. When this happens, it is usually called ”fork”. In reality, there are often some transactions that satisfy the commutative laws, but because of the problem of account design, they frequently cause forks. When the system starts from an initial state, receives two forked ledgers and ends up in the same state, we call these two ledgers a false forked ledger.
+
+
+
+
+
+
+
+
+TITLE:
+Introduction
+SUMMARY:
+The role of ledgers is to determine the order of transactions, and the order of transactions will affect the following two
+aspects: 1-Consistency of status  2-Effectiveness of Hash
+The design of the ledger also has two main objectives: 1-Reducing the false fork rate  2- Tamper proof 
+In the picture, the most-left side is a common set based structure in a centralization system without any tamper proofing features; the most right side is a typical block chain Ledger with the best tamper proof features; between the two, there are two DAG ledgers, the block-lattice account used by Nano on the left; and the right side, the tangle is used by IOTA . Block lattice maintains less partial order relations and is more suitable for the accounting structure of high performance  decentralized application platforms. Because of its poor tampering characteristics, it can expose security risks, so far, no other projects adopt this ledger structure except Nano.
+Vite adopts the DAG ledger structure. At the same time, by introducing an additional chain structure Snapshot Chain and improving the consensus algorithm, the shortcomings of block-lattice security are successfully made up, and the two improvements
+
+
+
+
+
+
+
+TITLE:
+Ledgers
+SUMMARY:
+Definition 2.6 (Vite Ledger): Vite Ledger is the strict poset composed by set of T of the given transaction, and the partial poset <
+
+A strict poset can correspond to a DAG structure. As shown in the figure below, circles represent transactions, and
+arrows denote dependencies between transactions a->b indicates that a depends on b.
+The Vite ledger is structurally similar to block-lattice. Transactions are divided into request  and response transactions, each of which corresponds to a separate block, each account Ai corresponds to a chain, a transaction pair, and a response transaction referencing the hash of its corresponding request transaction.
+
+
+
+TITLE:
+Definition 2.2 (Transaction Decomposition)Dividing a transaction with a degree of freedom greater than 1 into a set of single degree of freedom transactions, named Transaction Decomposition. A transfer transaction can be split into a sending transaction and a receiving transaction; a contract call transaction can be split into a contract request transaction and a contract response transaction; a message call within each contract can be split into a contract request transaction and a contractual response transaction.
+SUMMARY:
+Transaction Confirmation:
+ Definition 3.1 (Transaction Confirmation) when the probability of a transaction being rolled back is less than a given threshold
+ε, the transaction is called confirmed.
+
+Definition of snapshot chain: (Snapshot block and snapshot chain)a snapshot block that stores a state snapshot of a Vite ledger, including the balance of the account, the Merkle root of the contract state, and the hash of the last block in each account chain. The snapshot chain is a chain structure composed of snapshot blocks, and the next snapshot block refers to the hash of the previous snapshot block
+The state of a user account contains the balance and the hash of the last block of the account chain; in addition to
+the above two fields, the state of a contract account contains the Merkle root hash of it
+
+
+
+
+
+
+
+
+
+TITLE:
+Snapshot Chain
+SUMMARY:
+Definition 3.3 (Transaction Confirmation in Vite) In Vite, if a transaction is snapshot by snapshot chain, the
+transaction is confirmed., the depth of the snapshot block in the first snapshot, is called the confirmation number of the transaction
+
+Double Spend Transactions: The natural security flaws of block-lattice structure have been remedied. If an attacker wants to generate a double spend transaction, in addition to rebuilding the hash reference in the Vite ledger, it also needs to be rebuilt in the snapshot chain for all the blocks after the first snapshot block of the transaction, and need to produce a longer snapshot chain. In this way, the cost of attack will be greatly increased
+
+Consensus: Generally, the DPoS algorithm has obvious advantages in performance and scalability. Therefore,they choose DPoS
+as the basis of the Vite consensus protocol and expand it properly on the basis of it. The consensus protocol of Vite is HDPoS (Hierarchical Delegated Proof of Stake). The basic idea is to decompose (functional decomposition):
+
+
+Local consensus generate the blocks corresponding to request transactions and response transaction in the user account or contract account, 
+and writes to the ledgers. Global consensus snapshots the data in the ledger and generates snapshot blocks. If the ledger is forked, choose one
+ of them
+
+
+TITLE:
+
+SUMMARY:
+Recovery &verifications of transactions
+Calculate quotes & inquire about history
+
+TITLE:
+Other designs
+SUMMARY:
+--How to improve the parallelism of transaction verification or adopt a distributed verification strategy will be an important direction for future optimization
+-- some shortcomings exist in the current algorithm
+--There is much work to do in dApp foreground ecosystem construction. For example, you can
+build a dApplet engine based on HTML5 in the mobile wallet application of Vite, allowing developers to develop
+and publish dApp at low cost.
+
+
+
+
+
+TITLE:
+Tasks in Future & Conclusion
+SUMMARY:
+Yuan Lu, Qiang Tang, Guiling Wang of NJIT
+presented by Mikhail Nesterenko
+
+
+TITLE:
+ZebraLancerPrivate and Anonymous Crowdsourcing System atop Open Blockchain
+SUMMARY:
+requester has a task to be carried out by workers for reward
+request:  task T needs answers from N workers with budget B 
+second phase: workers rate other workers answers, get part of budget based on quality
+problems:
+requester may fail to pay
+requester may submit its own answers to augment workers rewards
+workers may submit multiple times 
+workers may learn other workers answers and submit 
+
+TITLE:
+Crowdsourcing
+SUMMARY:
+centralized crowdsourcing platform is a bottleneck and single point of failure
+blockchain is nice but need
+data confidentiality: other parties should not learn the answers
+anonymity: identity of workers/requesters should not be revealed or traced across answers
+
+
+
+TITLE:
+Decentralization and Blockchain
+SUMMARY:
+zk-SNARK – zero knowledge proof system
+blockchain being able to verify them
+RA – registration authority
+common prefix linkable authentication – needed to ensure one-per participant submission
+
+TITLE:
+Tools
+SUMMARY:
+register – everyone registerswith RA, gets certificate,generates public/private keypair
+publish task – requesterauthenticates and publishescontract with promisedreward policy
+answer collection – contract collects answers (one per worker), verifies submission with zk-SNARK
+reward – requester gets answers, computes and proves to the contract how to reward each answer
+
+
+TITLE:
+Architecture & Protocol
+SUMMARY:
+image annotation crowdsourcing task, majority voting used to determine "truth", all truthful workers get equal portion of reward
+Etherium, augmented with SNARK library
+test network of 4 PCs
+
+TITLE:
+Implementation
+SUMMARY:
+interesting application of blockchain
+relatively straightforward tools and techniques
+working implementation
+minimal evaluation
+decently written paper
+somewhat straightforward security analysis
+
+TITLE:
+Thoughts
+SUMMARY:
+By: Anton Churyumov
+
+TITLE:
+Byteball: A Decentralized System for Storage and Transfer of Value
+SUMMARY:
+Byteball is a decentralized system that allows tamper proof storage of arbitrary data, including data that represents transferrable value such as currencies, property titles, debt, shares, etc.
+
+
+Storage units are linked to each other such that each storage unit includes one or more hashes of earlier storage units, which serves both to confirm earlier units and establish their partial order. The set of links among units forms a DAG (directed acyclic graph). There is no single central entity that manages or coordinates admission of new units into the database, everyone is allowed to add a new unit provided that he signs it and pays a fee equal to the size of added data in bytes.
+
+
+TITLE:
+ABSTRACT
+SUMMARY:
+There is an internal currency called ‘bytes’ that is used to pay for adding data into the decentralized database. Other currencies (assets) can also be freely issued by anyone to represent property rights, debt, shares, etc.
+Users can send both bytes and other currencies to each other to pay for goods/services or to exchange one currency for another; the transactions that move the value are added to the database as storage units. 
+If two transactions try to spend the same output (double-spend) and there is no partial order between them, both are allowed into the database but only the one that comes earlier in the total order is deemed valid. Total order is established by selecting a single chain on the DAG (the main chain) that is attracted to units signed by known users called witnesses
+
+TITLE:
+CONTINUE…
+SUMMARY:
+Users store their funds on addresses that may require more than one signature to spend (multisig). Spending may also require other conditions to be met, including conditions that are evaluated by looking for specific data posted to the database by other users (oracles).
+
+Users can issue new assets and define rules that govern their transferability
+
+TITLE:
+CONTINUE…
+SUMMARY:
+What we present here is data storage that is not rewritable. It is a distributed decentralized database where records can neither be revised nor deleted entirely.
+Byteball is designed to generalize Bitcoin to become a tamper proof storage of any data, not solely transfers of a single electronic currency, and remove some of the most pressing deficiencies that impede a wider adoption and growth of Bitcoin
+
+TITLE:
+INTRODUCTION
+SUMMARY:
+Blocks: there are no blocks, transactions are their own blocks, and they need not connect into a single chain. Instead a transaction may be linked to multiple previous transactions, and the whole set of transactions is not a chain but a DAG (directed acyclic graph). DAG-based designs have received much attention recently.
+
+Cost: In Byteball, there is no PoW, instead we use another consensus algorithm based on an old idea that was known long before Bitcoin
+
+Finality:In Byteball, there are deterministic criteria for when a transaction is deemed final, no matter how large it was.
+
+
+TITLE:
+
+SUMMARY:
+Exchange rate: In Byteball, the base currency, bytes, is used to pay for adding data into the Byteball database. It is a measure of the utility of the storage in this database, and actual users will have their opinion on what is a reasonable price for this. 
+
+ If the price of byte rises above what you think is reasonable for your needs, you will      find ways to store less bytes, therefore you need to buy less bytes, demand decreases, and the price falls. 
+
+TITLE:
+
+SUMMARY:
+Privacy: Transactions in bytes (the base currency) in Byteball are equally visible, but there is a second currency (blackbytes), which is significantly less traceable.
+
+Compliance: In Byteball, one can issue assets with any rules that govern their transferability, from no restrictions at all, like Bitcoin, to anything like requiring every transfer to be cosigned by the issuer (e.g. the bank) or restricted to a limited set of whitelisted users.
+
+
+TITLE:
+
+SUMMARY:
+When a user wants to add data to the database, he creates a new storage unit and broadcasts it to his peers. The storage unit includes (among other things): 
+
+• The data to be stored. A unit may include more than one data package called a message. There are many different types of messages, each with its own structure. One of the message types is payment, which is used to send bytes or other assets to peers.
+
+• References to one or more previous units (parents) identified by their hashes.
+
+TITLE:
+Database Structure
+SUMMARY:
+Like in blockchains where each new block confirms all previous blocks (and transactions therein), every new child unit in the DAG confirms its parents, all parents of parents, parents of parents of parents, etc
+
+TITLE:
+
+SUMMARY:
+Native currency: bytes: Next, we need to introduce some friction to protect against spamming the database with useless messages.
+The simplest measure is the size of the storage unit. 
+Thus, to store your data in the global decentralized database you have to pay a fee in internal currency called bytes, and the amount you pay is equal to the size of data you are going to store (including all headers, signatures, etc).
+
+
+
+
+
+
+
+TITLE:
+
+SUMMARY:
+Double-spends: 
+If a user tries to spend the same output twice, there are two possible situations:
+ 1. There is partial order between the two units that try to spend the same output. it is obvious that we can safely reject the later unit.
+
+ 2. There is no partial order between them. In this case, we accept both. We establish a total order between the units later on, when they are buried deep enough under newer units (see below how we do it). The one that appears earlier on the total order is deemed valid, while the other is deemed invalid
+
+TITLE:
+
+SUMMARY:
+When a user composes a new unit, he selects the most recent other units as parents of his unit. By putting them on his parents list, he declares his picture of the world, which implies that he has seen these units. He has therefore seen all parents of parents, parents of parents of parents, etc up until the genesis unit. This huge set should obviously include everything that he himself has produced, and therefore has seen
+
+TITLE:
+
+SUMMARY:
+The main chain: Our DAG is a special DAG. 
+In normal use, people mostly link their new units to slightly less recent units, meaning that the DAG grows only in one direction.
+This property suggests that we could choose a single chain along child-parent links within the DAG, and then relate all units to this chain.
+ All the units will either lie directly on this chain, which we’ll call the main chain, or be reachable from it by a relatively small number of hops along the edges of the graph. 
+
+TITLE:
+
+SUMMARY:
+
+One way to build a main chain is to develop an algorithm that, given all parents of a unit, selects one of them as the “best parent”. The selection algorithm should be based only on knowledge available to the unit in question, i.e. on data contained in the unit itself and all its ancestors.
+
+ Starting from any tip (a childless unit) of the DAG, we then travel backwards in history along the best parent links. 
+
+Traveling this way, we build a main chain and eventually arrive at the genesis unit. 
+
+TITLE:
+building a main chain
+SUMMARY:
+Once we have a main chain (MC), we can establish a total order between two conflicting nonserial units.
+Let’s first index the units that lie directly on the main chain. The genesis unit has index 0, the next MC unit that is a child of genesis has index 1, and so on traveling forward along the MC we assign indexes to units that lie on the MC. 
+For units that do not lie on the MC, we can find an MC index where this unit is first included (directly or indirectly). In such a way, we can assign an MC index (MCI) to every unit. 
+
+
+TITLE:
+
+SUMMARY:
+Witnesses:
+The “near-conformity rule”: best parents must be selected only among those parents whose witness list differs from the child’s witness list by no more than one mutation. This rule ensures that witness lists of neighboring units on the MC are similar enough, therefore their histories mostly agree with one another. The parents whose witness list differs by 0 or 1 mutation will be called compatible (with the unit that includes them directly), while the others are incompatible. Incompatible parents are still permitted, but they have no chance of becoming best parent. If there are no compatible potential parents among childless units (an attacker could flood the network with his units that carry a radically different witness list), one should select parents from older units
+
+
+TITLE:
+
+SUMMARY:
+The above means that each unit must list its witnesses so that they can be compared. We require that the number of witnesses is exactly 12. This number 12 was selected because: 
+• it is sufficiently large to protect against the occasional failures of a few witnesses (they might prove dishonest, or be hacked, or go offline for a long time, or lose their private keys and go offline forever);
+ • it is sufficiently small that humans can keep track of all the witnesses to know who is who and change the list when necessary; 
+• the one allowed mutation is sufficiently small compared with the 11 unchanged witnesses.
+
+TITLE:
+
+SUMMARY:
+As new units arrive, each user keeps track of his current MC which is built as if he were going to issue a new unit based on all current childless units.
+
+The current MC may be different at different nodes because they may see different sets of childless units. We require that the current MC be built without regard of witness lists, i.e. the user’s own witness list doesn’t matter and even incompatible parents can be selected as best parents. That means that if two users have the same set of childless units, but have different witness lists, their current MCs will still be 12 identical. The current MC will constantly change as new units arrive. However, as we are about to show, a part of the current MC that is old enough will stay invariant
+
+TITLE:
+Finality
+SUMMARY:
+if we forget about all parents except the best parent, our DAG will be reduced to a tree that consists only of best parent links. Obviously, all MCs will go along the branches of this tree. We then need to consider two cases – when the tree does branch in the current stability point and when it does not – and decide if we can advance the stability point to the next MCI.
+
+
+TITLE:
+
+SUMMARY:
+The hash that is stored instead of the full content still has some utility to the attacker, as he can store the original data himself and use the hash to prove that the data existed. But remember that: 
+He still has to pay for one unit that is deemed valid
+ 2. If the attacker is already internally storing metadata that is necessary to interpret Byteball data, he could do equally well by just combining all his data into a Merkle tree and using Byteball to store only its Merkle root for the cost of one small unit.
+
+TITLE:
+Storage of nonserial units
+SUMMARY:
+Every ball includes information about all its ancestor balls (via parents), hence the amount of information it depends on grows like snowball. We also have a flag in the ball that tells us if it ended up being invalid (nonserial), and we have references to older balls that we’ll use later to build proofs for light clients.
+
+We can only build a ball when the corresponding unit becomes stable and we know for certain whether it is serial. Since the current MCs as viewed by different users are eventually consistent, they will all build exactly the same ball based on the same unit.
+
+TITLE:
+Balls
+SUMMARY:
+To protect the balls (most importantly, the is_nonserial flag) from modification, we require each new unit to include a hash of the last ball that the author knows about (which is the ball built from the last stable unit, and it lies on the MC).
+
+ database wants to know if a particular unit is serial, he would give us a list of witnesses he trusts to behave honestly, and we would build a chain of recent units that includes the majority of the said witnesses, then read last ball from the oldest unit of the chain, and use balls to build a hash tree that has the last ball at the top and includes the requested unit somewhere below. 
+
+TITLE:
+Last ball
+SUMMARY:
+Witness list unit: 
+It is expected that many users will want to use exactly the same witness list
+In this case, to save space, they don’t list the addresses of all 12 witnesses. Rather, they give a reference to another earlier unit, which listed these witnesses explicitly
+
+Commissions: 
+the cost to store a unit is its size in bytes. The commission is split into two parts: headers commission and payload commission. 
+Payload commission is equal to the size of messages;
+headers commission is the size of everything else. The two types of commissions are distributed differently.
+
+
+TITLE:
+
+SUMMARY:
+Confirmation time is the time from a unit entering the database to reaching stability. 
+
+To minimize the confirmation period, the witnesses should post frequently enough but not too frequently.
+
+ The best confirmation times are reached when the witnesses are well connected and run on fast machines so that they are able to quickly validate new units. 
+
+TITLE:
+Confirmation time
+SUMMARY:
+As mentioned before, our protocol rules require that: 
+1. best parent is selected only among parents whose witness list has no more than 1 mutation; 
+2. there should be no more than 1 mutation relative to the witness list of the last ball unit; 
+3. there should be no more than 1 mutation relative to the witness lists of all the unstable MC units up to the last ball unit; 
+4. the stability point advances only when the current witnesses (as defined in the current stability point) post enough units after the current stability point.
+
+TITLE:
+. Choosing witnesses
+SUMMARY:
+Some of the balls contain a skiplist array which enables faster building of proofs for light clients 
+
+Only those balls that lie directly on the MC, and whose MC index is divisible by 10, have a skiplist.
+
+ The skiplist lists the nearest previous MC balls whose index has the same or smaller number of zeros at the end. 
+
+TITLE:
+Skiplist
+SUMMARY:
+Light clients do not store the entire Byteball database. Instead, they download a subset of data they are interested in, such as only transactions where any of the user’s addresses are spending or being funded. 
+Light clients connect to full nodes to download the units they are interested in. 
+The light client tells the full node the list of witnesses it trusts and the list of its own addresses.
+ The full node searches for units the light client is interested in and constructs a proof chain for each unit in the following way: 
+1. Walk back in time along the MC until the majority of requested witnesses are met. Collect all these MC units. 
+2. From the last unit in this set (which is also the earliest in time), read the last ball. 
+3. Starting from this last ball, walk back in time along the MC until any ball with a skiplist is met. Collect all these balls. 
+4. Using the skiplist, jump to an earlier ball referenced from the skiplist. This ball also has a skiplist, jump again. 
+
+TITLE:
+Light clients
+SUMMARY:
+Addresses: Users are identified by their addresses, transaction outputs are sent to addresses, and, like in Bitcoin, it is recommended that users have multiple addresses and avoid reusing them. 
+
+Profiles: Users can store their profiles on Byteball if they want
+
+Attestations: Attestations confirm that the user who issued the attestation (the attestor) verified some data about the attested user (the subject). 
+The information included in the attestation need not be the same as in user’s selfpublished profile. Indeed, the self-published profile might not even exist at all
+
+
+TITLE:
+
+SUMMARY:
+We have proposed a system for decentralized immutable storage of arbitrary data, including data of social value such as money.
+
+Every new unit of data implicitly confirms the existence of all previous units.
+
+There is an internal currency that is used to pay for inclusion of data in the decentralized database. 
+
+The payment is equal to the size of the data to be stored, and other than this payment there are no restrictions on access to the database.
+
+TITLE:
+Conclusion
+SUMMARY:
+When tracking payments in the internal currency and other assets, double-spends are resolved by choosing the version of history that was witnessed by known reputable users.
+
+Settlement finality is deterministic. Assets can be issued with any rules that govern their transferability, allowing regulated institutions to issue assets that meet regulatory requirements.
+
+At the same time, transfers can be hidden from third parties by sending their content privately, directly from payer to payee, and publishing spend proofs to ensure that each coin is spent only once
+
+TITLE:
+
+SUMMARY:
+Serguei Popov
+
+TITLE:
+The Tangle
+SUMMARY:
+Concept of transaction fee for transactions of any value in cryptocurrencies.
+Heterogeneous nature of systems: Transactions issuers and Transaction approvers resulting in conflicts which requires spending some sources on conflict resolution.
+Scalability issues
+High hardware and resource requirements
+
+
+TITLE:
+Problem Scenario
+SUMMARY:
+
+Analyze the mathematical foundations of IOTA, a cryptocurrency targeting IoT.
+The tangle, a directed acyclic graph(DAG) for storing transactions.
+A family of Markov Chain Monte Carlo algorithms for selecting tips in the tangle.
+
+
+
+TITLE:
+Contributions
+SUMMARY:
+Sites: Transactions represented on the tangle graph.
+Nodes: Nodes are entities that issue and validate transactions.
+Tips: Unapproved transactions in the tangle graph.
+Height: the length of the longest oriented path to the genesis.
+Depth: the length of the longest reverse-oriented path to some tip.
+Genesis: very first transaction in Tangle
+
+TITLE:
+Some terminologies	
+SUMMARY:
+The transaction making process in IOTA is a simple, 3 step process:
+Signing: Sign the transaction inputs with your private key
+Tip Selection: MCMC (Markov chain Monte Carlo) is used to randomly select two tips (i.e. unconfirmed transactions), which will be referenced by your transaction.
+Proof of Work: In order to have your transaction accepted by the network, you need to do some Proof of Work — similar to Hashcash (spam and sybil-resistance)
+
+TITLE:
+Issuing a transaction
+SUMMARY:
+
+TITLE:
+A parasite chain attack and a new Tip Selection Algorithm
+SUMMARY:
+1. Consider all sites on the interval [W, 2W], where W is reasonably large.
+2. Independently place N particles on sites in that interval.
+3. Let these particles perform independent discrete-time random walks “towards the tips”, meaning that a transition from x to y is possible if and only if y approves x.
+4. The two random walkers that reach the tip set first will sit on the two tips that will be approved. However, it may be wise to modify this rule in the following way: first discard those random walkers that reached the tips too fast because they may have ended on one of the “lazy tips”.
+
+TITLE:
+Weighted MCMC algorithm
+SUMMARY:
+if y approves x (y ↝x), then the transition probability Pxy is proportional to
+
+
+TITLE:
+Weighted MCMC algorithm (transition probability)
+SUMMARY:
+This algorithm is used for two purposes.
+For choosing two unconfirmed transactions(tips) when creating a transaction.
+For determining the confirmation confidence of a transaction.
+The MCMC tip selection algorithm also offers protection against the lazy nodes as a bonus.
+
+
+
+
+TITLE:
+Weighted MCMC algorithm 
+SUMMARY:
+“Large weight” attack where in order to double-spend, the attacker tries to give a very large weight to the double-spending transaction so that it would outweigh the legitimate subtangle. As a solution, limit the own weight of a transaction from above, or set it to a constant value.
+When the input flow of “honest” transactions is large enough compared to the attacker’s computational power, the probability that the double-spending transaction has a larger cumulative weight will be very low.
+ The attack method of building a “parasite chain” makes approval strategies based on height or score obsolete since the attacker’s sites will have higher values for these metrics when compared to the legitimate tangle. This is where the MCMC tip selection algorithm seems to  provide protection against this kind of attack.
+
+TITLE:
+Resistance to different attacks
+SUMMARY:
+Quantum computers, still a hypothetical construct as of today will be very efficient for checking nonces to find a suitable hash. I.e do PoW. 
+However, the number of nonces that one needs to check in order to find a suitable hash in tangle is not unreasonably large. On average it is around 38. So, quantum computation wont benefit much in case of tangle.
+
+TITLE:
+Resistance to quantum computations
+SUMMARY:
+Authors: Loi Luu, Duc-hiep Chu, Hrishi Olickel, Prateek Saxena, Aquinas Hobor
+Presenter: Kendric Hood
+
+TITLE:
+Making Smart Contracts Smarter
+SUMMARY:
+This paper Identifies several security exploits in the Ethereum Cryptocurrency Smart Contracts and provides a way to identify them prior to submission to the blockchain. 
+
+TITLE:
+Contribution 
+SUMMARY:
+A Smart Contract is a procedure that is executed by the miners and its correctness maintained by the blockchain consensus. 
+Many cryptocurrency’s have them with varying implantations. This paper only focus on Ethereum’s implantation.
+Smart Contracts is made up of three main parts
+Address of the contract
+EVM Bytecode (logic of the contract)
+Storage
+Invoked by sending ether to the Address of the contract  
+When the transaction is accepted on the block chain then the bytecode is excited 
+
+
+TITLE:
+Smart Contracts 
+SUMMARY:
+Gas is the mechanize in Ethereum to prevent a contract from wasting miner resources.
+Gas Price: is the amount of gas that is needed to run some line of code 
+Gas Cost: is the amount of Ether needed for each unit of gas
+Never used outside of the localhost, when a user invokes a contract they must send a certain amount of Ether to pay for the gas cost. If more gas is used then is paid for then the execution of the contract is stopped. Spent Ether is not refunded. 
+
+TITLE:
+Gas
+SUMMARY:
+There are four types of Vulnerability’s identified 
+Transaction Ordering Dependence (TOD)
+Timestamp Dependence
+Mishandled Exception
+Reentrancy
+
+
+TITLE:
+Vulnerability's
+SUMMARY:
+This is an issue where the order in which transaction are executed effects  the final outcome of a contract. 
+An example would be the Puzzle Contract
+If the owner attempts to change the reward amount at the same time as the solution to the puzzle is submitted the reward amount can change based on which is executed first. 
+
+TITLE:
+Transaction Ordering Dependence
+SUMMARY:
+Timestamp Dependence are contracts which use the block timestamp. 
+The Run is one example where the block timestamp is used to determine the winner.  
+A miner can manipulate this time stamp to his/her favor. 
+
+TITLE:
+Timestamp Dependence
+SUMMARY:
+A mishandled exception is an issue with the way that Ethereum has implemented the << send >> instruction. 
+Known exploit is to force a contract to raise an exception by causing a stack overflow 
+
+
+TITLE:
+Mishandled Exception
+SUMMARY:
+Reentrancy is when a contract calls another contract and is left in an intermediate state. For example if a user tries to use a contract to withdraw Ether from some account the account value might only be updated after the Ether has been sent via a different function however if this function calls to withdraw the balance again then more ether will be withdrawn because the account was not updated. 
+
+TITLE:
+Reentrancy
+SUMMARY:
+Update the clients on all miners
+Test contracts with the Oyente Tool before deployment
+
+TITLE:
+Solutions 
+SUMMARY:
+TOD
+Add a guard condition, for example if submitting a solution to the Puzzle contract the guard condition would verify that the reward is the same as when the solution was posted. If not then the solution is not submitted. This is very similar to the compare and swap instruction supported by most processors.
+Current contract can be maintained by simply passing True for the guard condition by default. 
+
+TITLE:
+Updates to Miners
+SUMMARY:
+Timestamp Dependence can be fixed by using the block index instead. The index can not be changed by the miner and is available to all miners.
+Current contracts can be maintained by changing the << TIMESTAMP >> instruction to return the block ID instead.
+
+TITLE:
+Updates to Miners
+SUMMARY:
+Update the EVM to propagate exception as most modern languages do.
+
+
+TITLE:
+Mishandled Exception
+SUMMARY:
+The Oyente Tool can be used to evaluate contract before they are submitted to the block chain. 
+The Oyente Tool identifies Bugs and Security risks in a contract. 
+
+TITLE:
+The Oyente Tool
+SUMMARY:
+Reads in the EVM bytecode can the current Global Ethereum State
+Oyente simulates the EVM by symbolic execution of the contract. Each value of the contract is replaced by a symbol. These symbols are then used later to determine which path of the CFG is taken 
+ Identifies all four attacks outlined before 
+
+TITLE:
+The Oyente Tool cont.
+SUMMARY:
+The CFG Builder constructs a control flow graph where each state is a node and there transitions are the edges between them
+Not all edge are known at the time the CFG builder builds the Graph and so more are added/removed on the fly during the symbolic execution. 
+
+TITLE:
+CFG Builder
+SUMMARY:
+The Explorer starts from the entry node of the CFG.
+The Explorer then runs an instruction under every possible state the contract might be in.
+It then uses a solver (Z3) to check if a branch is provable True or False, that is will this instruction always lead to one particular instruction or does the path split.
+If a path is provable True or False the only one path is explored otherwise all possible paths are explored. 
+
+
+TITLE:
+Explorer
+SUMMARY:
+Once the CFG is built and then updated by the explore all posable path of Ether are check for the attacks outlined before. 
+TOD: Explorer will highlight paths that can results in deferent Ether flows on swapping transaction orders.
+Timestamp dependence:  Simply highlights when timestamp is used in the contract
+Mishandled Exceptions:  Checks if a contract check for exceptions in other contracts/function it calls, by looking for ISZERO operator on the operator stack
+Reentrancy: At each CALL statement a check is preformed on the path condition to see if the CALL can be made again, if so such a vulnerability exsits
+
+
+
+
+TITLE:
+Core Analysis
+SUMMARY:
+Attempts to remove some false positives by checking conditions flagged by the core analysis. Each condition is checked for feasibility, if such a path is infeasible then it is removed from the list of flagged vulnerabilities.  
+
+TITLE:
+Validation
+SUMMARY:
+Oyente Was run on 19,366 contracts
+Total amount of Ether was 3,068,654
+About 30 Million Dollars
+Most contract had a balance of zero
+10% had at lest one Ether
+While one contract had 38.9% of the total
+Average was 318.5
+
+
+TITLE:
+Evaluation
+SUMMARY:
+To verify Oyente Accuracy contracts had to checked manually.
+This requires there source to be publicly available 
+Of the Mishandled Exceptions 
+116 of 1,385 where checked (8%)
+100% Accuracy
+TOD Dependence
+32 of 135 checked (24%)
+72% Accuracy
+Timestamp Dependence
+7 of 52 checked (14%)
+Reentrancy Handling
+2 of 186 checked (1%)
+100% Accuracy
+
+
+
+TITLE:
+Evaluation cont.
+SUMMARY:
+Oyente seems to be very useful but 
+	Why not find a way to update contract?
+The vulnerabilities seem to have simple solutions
+	 Oyente seems under utilized for solving this problem
+A far amount of the paper us used on describing the vulnerabilities but for the most part they are known vulnerabilities, not first introduced by this paper. 
+More time should have been spent on Evaluation. 
+
+
+TITLE:
+Thoughts
+SUMMARY:
+Subtitle
+
+TITLE:
+Hierarchical Geographic Multicast Routing for Wireless Sensor Networks
+SUMMARY:
+Introduction to Multicasting Protocols
+GMR: Geographic Multicast Routing for Wireless Sensor Networks
+HRPM: Hierarchical Rendezvous Point Multicast
+HGRM
+Evaluation in Ideal Environment
+Evaluation in Realistic Environment
+
+
+
+TITLE:
+Overview
+SUMMARY:
+Efficient Multicasting is critical due to limited energy availability
+We will be looking at Stateless algorithms (build location information and use geographic forwarding down multicast trees)
+Thus, multicast membership and routing state do not have to be distributed
+2 Challenges presented to which GMR and HRPM were to solve
+A.  Stateless protocols use Geographic forwarding hence are not exploring Multicast advantage of wireless transmission
+B.  As Network size increases data packet overhead becomes significant
+
+TITLE:
+Intro to Multicasting
+SUMMARY:
+Assumes centralized management at multicast root
+Each forwarding node propagating multicast data needs to select a subset of its neighbors as relay nodes towards destinations.
+Cost/Progress Ratio used 
+Cost = # of selected neighbors  Progress = overall reduction in distance to destination 
+
+TITLE:
+GMR: Geographic Multicast Routing
+SUMMARY:
+
+TITLE:
+Fig 1 Fowarding Nodes Selection (Cost/Progress) 2/T1-T2
+SUMMARY:
+Contained in the Data Message Header is:
+1.  The ID of the neighbors it has selected as a relay node
+2.  The ID of the destinations each of the selected relay nodes is   responsible for
+The message is then broadcast so that all neighbors may receive it thus reducing the number of transmissions (energy consumption)
+
+TITLE:
+GMR
+SUMMARY:
+2 Key design Concepts
+1. Use of hierarchical decomposition of multicast groups
+2. Leveraging geographic hashing to construct and maintain such a hierarchy efficiently
+Tackles the earlier goal of limiting packet overhead irrespective of group size.  Achieved by recursively partitioning a large multicast group into manageable-sized subgroups.
+
+TITLE:
+HRPM: Hierarchical Rendezvous Point Multicast
+SUMMARY:
+Geographically Divide deployment area into smaller and smaller cells
+AP (Access Point) Manages all members of a leaf cell
+Groups of AP’s are managed recursively (by parent AP’s)
+RP (Rendezvous Point) Manages an entire region of cells
+d = Decomposition Index Example d^2 d=4 so 16square Grid
+
+TITLE:
+HRPM
+SUMMARY:
+Geographic Hashing – Reduces the maintenance of AP/RP nodes at virtually no maintenance cost
+Done simply by making a fixed geographic location the AP or RP and the node closest to that location is always the AP or RP
+If holes are encountered uses Face Routing (GFG, GPSR)
+
+
+TITLE:
+HRPM
+SUMMARY:
+When a message needs to be sent:
+1)  Hashes the multicast group’s identifier for RP
+2)  Contacts RP and finds out what APs are active
+3)  Afterwards, Source builds overlay tree Source -> AP’s considering each active AP as a vertex and sends packets using geographic routing.
+4) AP’s -> Members tree is built and both use unicasting meaning they send the same packet with a modified header for its path specific to the tree.
+
+TITLE:
+HRPM
+SUMMARY:
+
+TITLE:
+Figure 2 Group management, tree construction, and data delivery in HRPM
+SUMMARY:
+GMR summed up
+Good:  GMR reduces transmissions from source to all destinations by broadcasting to all neighbors at each Hop
+Bad:     GMR has high packet header overhead due to this
+HRPM summed up
+Good:  HRPM reduces packet overhead by dividing large groups into subgroups (Changing Headers)
+Bad:  Unicasting same packet data more than once consumes bandwidth and creates an energy inefficient solution.
+
+TITLE:
+HGMR:  Hierarchical Geographic Multicast Routing
+SUMMARY:
+Divides the multicasting group the same way as HRPM
+Except at the AP -> members overlay tree the GRM algorithm of cost/progress is used.
+Using the cost/progress algorithm reduces the number of transmissions and maintaining HRPM’s multicasting group ensures the packet headers don’t get to large.
+Cost/progress uses WMA to cut down on re-transmitting when it is unnecessary in the example only 5/8 nodes rebroadcast
+
+TITLE:
+HGMR
+SUMMARY:
+
+TITLE:
+HGMR
+SUMMARY:
+
+TITLE:
+Simulation in an Idealistic Environment (No packet Loss)
+SUMMARY:
+
+TITLE:
+Data transmissions – From Source to Destinations (Evaluates Efficiency of Path Selected)
+SUMMARY:
+
+TITLE:
+Forwarding Nodes – Nodes that transmitted Data Packet/Total Number of nodes
+SUMMARY:
+
+TITLE:
+Normalized Encoding Overhead – Total number of encoded bytes at every hop/ Total number of bytes at every hop
+SUMMARY:
+
+TITLE:
+Simulation in real world environment (Packet Loss)
+SUMMARY:
+
+TITLE:
+Packet Drop Rate – Significant for GMR Negligible for HGMR HRPM
+SUMMARY:
+
+TITLE:
+Latency – Significant at Higher network sizes
+SUMMARY:
+
+TITLE:
+Data Transmissions – (Same Results)
+SUMMARY:
+
+TITLE:
+Forwarding Cost –Total Number of Packet Transmissions / Total number of Packets Received by Multicast Transmissions (WAN)
+SUMMARY:
+
+TITLE:
+Normalized Encoding Overhead (Same results)
+SUMMARY:
+
+TITLE:
+Stateless Multicasting in Mobile Ad hoc networks
+SUMMARY:
+Can scale to large group size and network size
+Provide robust multicast packet transmissions in a dynamic mobile ad hoc network environment.
+Introduce Source Home to track positions and addresses of all the sources in the network.
+
+TITLE:
+Robust and Scalable Geographic Multicast protocol (rsgm)
+SUMMARY:
+Proposing stateless distribution schemes that data and control messages can be sent along efficient virtual-tree paths.
+Making use of the position information to design a scalable and reactive zone-based scheme for efficient membership management
+Supporting efficient location search of multicast group members, by combining the location service with the membership management to avoid the need and overhead of using a separate location server.
+Introducing a Source Home to track the addresses and positions of the sources
+Designing schemes to handle the empty-zone problems for both member zones and the source home
+
+
+
+TITLE:
+Contributions
+SUMMARY:
+
+TITLE:
+Zone Structure
+SUMMARY:
+
+TITLE:
+Simulations
+SUMMARY:
+
+TITLE:
+simulations
+SUMMARY:
+
+TITLE:
+Simulations
+SUMMARY:
+
+TITLE:
+Simulations
+SUMMARY:
+张梓径
+
+TITLE:
+GeoDTN+Nav: Geographic DTN Routing with Navigator Prediction for Urban Vehicular Environments
+SUMMARY:
+Vehicular Ad Hoc Network
+Geographic location awareness{Navigation system equipped}
+Local maximum limit of geographic routing
+
+
+
+TITLE:
+Problem
+SUMMARY:
+Perimeter mode
+Packet extraction
+Local maxima
+Network planarization
+Suboptimal
+Complex planarization
+
+
+TITLE:
+Solutions/Geometric/Greedy Perimeter Stateless Routing
+SUMMARY:
+Planarization suppression
+Planar graph assumption
+Roads
+Edges
+Forwarding
+Junctions
+Vertices
+Routing decisions
+Always exist assumption
+Not always true
+Packet forwarding passing junction
+Routing loop
+Cross links
+
+TITLE:
+Solutions/Geometric/Greedy Perimeter Coordinator Routing	
+SUMMARY:
+
+TITLE:
+Figures/Routing Loop
+SUMMARY:
+Loop
+Detection
+Removal
+Delivery ratio increase
+
+
+TITLE:
+VCLCR
+SUMMARY:
+Final destination neighbor selection
+Shortest distance
+Packet destination
+Vehicle path
+ETA
+Forwarding to shortest
+
+TITLE:
+Solution/DTN/GeOpps
+SUMMARY:
+Motion vector
+Fowarding decisions
+Moving direction
+Line extending
+ETA calculation
+Lookahead
+Waypoint
+Direction changing point
+
+
+TITLE:
+Solution/DTN/MoVe
+SUMMARY:
+Disconnected VANET
+Disconnection
+Delivery failure
+Junction aggregation
+Partition
+Delay/Disruption-tolerant networking
+Message carrying vehicles
+Among different partitions
+Sufficient amount
+Store-carry-and-forward
+Increase delay
+
+TITLE:
+Solution/GeoDTN+Nav
+SUMMARY:
+Modes
+Greedy geographic routing
+Efficient routing
+DTN
+Partition delivery guarantee
+Network partition detection
+Mode switching
+Virtual Navigation Interface
+Navigation prediction
+Forwarder choosing
+
+
+TITLE:
+Solution/GeoDTN+Nav
+SUMMARY:
+
+TITLE:
+Figures/Packet
+SUMMARY:
+
+TITLE:
+Figures/Mode switching
+SUMMARY:
+
+TITLE:
+Figures/VNI patterns
+SUMMARY:
+
+TITLE:
+Figures/VNI components
+SUMMARY:
+
+TITLE:
+Figures/Perimeter mode Markov Chain
+SUMMARY:
+
+TITLE:
+Epilog/Super dense graph
+SUMMARY:
+
+TITLE:
+Epilog/Hyper-hybrid with strategy database
+SUMMARY:
+http://www3.cs.stonybrook.edu/~jgao/CSE590-fall09/geo-routing.pdf
+http://netlab.cs.ucla.edu/wiki/files/thesisProposalSlides.pdf
+GeoDTN+Nav: Geographic DTN Routing with Navigator Prediction for Urban Vehicular Environments
+
+TITLE:
+Reference
+SUMMARY:
+Multipath Multi-SPEED Protocol for QoS Guarantee of Reliability and Timeliness in Wireless Sensor Networks 
+Authors:
+Emad Felemban, Student Member, IEEE, Chang-Gun Lee, Member, IEEE, and Eylem Ekici, Member, IEEE 
+Presented By:
+Kendric Hood
+
+TITLE:
+MMSPEED: 
+SUMMARY:
+QoS in wireless ad hoc networks that provides reliability and real time. (short delay )
+Different trafic has different requirements. (reliability v. delay)
+Few QoS algorithms address both, normally one or the other.
+
+TITLE:
+Problem 
+SUMMARY:
+Dynamic Wireless ad hoc network
+Can not know whole topology (only direct neighbors)
+Power consumption is not considered. 
+
+TITLE:
+Scenario 
+SUMMARY:
+SPEED algorithm
+Maintains a list of average delay in sending packets to each neighbor compares this to a SetSpeed and looks at the progress to the destination to pick a forwarding node
+If no node fits the criteria then the packet is dropped to meditate  workload 
+MMSPEED
+Adds different layers so different packets can have different SetSpeeds
+
+TITLE:
+Timeliness 
+SUMMARY:
+MMSpeed 
+Offers a Reliability probability parameter for each packet which is used to help select a neighbor for forwarding. 
+Reliability of a neighbor is monitored by the system at the MAC layer 
+A combination of nodes can be used to reach the Reliability probability parameter however the Reliability probability parameter is decreased every time this happens 
+
+TITLE:
+Reliability
+SUMMARY:
+To support MMSPEED some features had to be added to the MAC layer to support it.
+One is insuring that higher priority packets get sent first. 
+Seconded is to insure parallel progress 
+
+TITLE:
+MAC Layer add-on
+SUMMARY:
+
+TITLE:
+Evaluation 
+SUMMARY:
+
+TITLE:
+Evaluation
+SUMMARY:
+
+TITLE:
+Evaluation
+SUMMARY:
+
+TITLE:
+Evaluation
+SUMMARY:
+Authors: Scott C.-H. Huang, Peng-Jun Wan, Xiaohua Jia, Hongwei Du and Weiping Shang‡ 
+
+TITLE:
+Minimum-Latency Broadcast Scheduling in Wireless Ad Hoc Networks 
+SUMMARY:
+In many Ad-Hoc Networks low latency broadcasts are essential.
+Most broadcast algorithms use a scheduling technical due to radio overlap.
+The Authors of this paper propose a minimum latency scheduling algorithm.  
+
+TITLE:
+The Problem
+SUMMARY:
+They first propose Basic Broadcasting Scheduling
+This uses a tree (rooted at the source) to build a tree of the network. Then labels nodes in what is called a maximal independent set to determine which nodes send when. First nodes labeled dominators and then by connectors 
+
+TITLE:
+Basic Broadcasting Scheduling 
+SUMMARY:
+This is an improvement over BBS in that only the minimum number of connectors (parents of dominators) are selected. This helps to prevent retransmission. This is close to finding the lest amount of nodes that need to transmit to reach the neighboring cell
+
+TITLE:
+Enhanced Broadcast Scheduling 
+SUMMARY:
+Finds the shortest path between the source and the destinations (dominators) 
+
+TITLE:
+Pipelined Broadcasting 
+SUMMARY:
+Why not just go to PBS?
+Is PBS not just clustering?
+Is this not a maximum latency not a minimum?
+
+TITLE:
+My thoughts 
