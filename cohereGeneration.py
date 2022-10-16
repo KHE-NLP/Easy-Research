@@ -150,7 +150,7 @@ def get_generation(prompts_, model="default"):
     for prompt_ in prompts_:
         yield co.generate(prompt=prompt_, model=models[model], max_tokens=150, temperature=0.5,
                           k=10, stop_sequences=["Passage:"], num_generations=3,
-                          presence_penalty=0.2)
+                          presence_penalty=0.3, frequency_penalty=0.2)
         print("Completed paragraph")
 
 
