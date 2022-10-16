@@ -121,7 +121,9 @@ def cleanData(paragraphs_):
 def get_generation(prompts_):
     co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
     for prompt_ in prompts_:
-        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.9, k=10, stop_sequences=["Passage:"])
+        yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.5, 
+						  k=10, stop_sequences=["Passage:"], num_generations=3,
+						  presence_penalty=0.2)
         print("Completed paragraph")
 
 
@@ -182,7 +184,7 @@ The time complexity of the training is linear with respect to A, which is pretty
     
     prompt = "Passage: \n {fPassage} \n\n  Summary:"
     print(len(paragraphs))
-    prompts = [prompt.format(fPassage=p) for p in paragraphs[12:13]]
+    prompts = [prompt.format(fPassage=p) for p in paragraphs[3:4]]
     prompts_with_prefix = [prefix + p for p in prompts]
     responses = list(get_generation(prompts_with_prefix))
 
