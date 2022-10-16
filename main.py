@@ -63,7 +63,9 @@ class ContinueServer(BaseHTTPRequestHandler):
             self.end_headers()
             targetVar = io.BytesIO()
             ppt.save(targetVar)
-            ppt.save(self.wfile)
+            ppt.save("/tmp/temp.pptx")
+            f = open("/tmp/temp.pptx", "rb")
+            f.save(self.wfile)
         else:
             self.send_response(400)
             self.send_header("Content-type", "text/html")
