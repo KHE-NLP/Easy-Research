@@ -1,6 +1,8 @@
 import cohere
 import re
 from parsers import get_pdf_paragraphs
+import pandas as pd
+import string
 
 
 def NOR(a, b):
@@ -117,6 +119,22 @@ def cleanData(paragraphs_):
     removeShort(paragraphs_)
     removeNonSpaces(paragraphs_)
     removeEmails(paragraphs_)
+    mergeContinuations(paragraphs_)
+
+def mergeContinuations(paragraphs_):
+    puncuation = string.punctuation + string.whitespace
+    newParagraphs = []
+
+    for i in range(len(paragraphs_)):
+        #print(i, ord(paragraphs_[i][0]))
+        if (paragraphs_[i][0].islower() or ( paragraphs_[i][0] in puncuation ) and ( i != 0 )):
+            #paragraphs_[i-1 : i] = [''.join(paragraphs_[i-1 : i])]
+            newParagraphs[-1] = newParagraphs[-1] + paragraphs_[i]
+        else:
+            newParagraphs.append(paragraphs_[i])
+
+
+    paragraphs_ = newParagraphs
 
 def get_generation(prompts_):
     co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
