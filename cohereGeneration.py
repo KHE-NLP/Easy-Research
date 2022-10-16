@@ -2,6 +2,7 @@ import cohere
 import re
 from parsers import get_pdf_paragraphs
 
+
 def NOR(a, b):
     if a == 0 or b == 0:
         return False
@@ -38,6 +39,7 @@ def cleanData(paragraphs_):
 def get_generation(prompts_):
     co = cohere.Client('hpaaYCC1MGPwyigl9JhSQg3NCZaLzDkSrYM6Iy6U')
     for prompt_ in prompts_:
+
         yield co.generate(prompt=prompt_, max_tokens=150, temperature=0.9, k=10)
         print("Completed paragraph")
 
