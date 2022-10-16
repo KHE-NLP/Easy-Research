@@ -1,5 +1,5 @@
 function uploadFile() {
-    var blobFile = $('#submitURL').files[0];
+    var blobFile = $('#filePDF').files[0];
     var formData = new FormData();
     formData.append("data", blobFile);
 
