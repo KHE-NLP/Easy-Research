@@ -112,7 +112,33 @@ def cleanData(paragraphs):
 	removeNonSpaces(paragraphs)
 	removeEmails(paragraphs)
 
+<<<<<<< Updated upstream
 def cleanData(paragraphs_):
+=======
+
+def removeFromList(paragraphs_, removals):
+    for r in removals:
+        paragraphs_.remove(r)
+
+
+def removeNonAscii(paragraphs_):
+    to_rem = []
+    for p in paragraphs_:
+        if not p[0].isascii():
+            to_rem.append(p)
+    removeFromList(paragraphs_, to_rem)
+
+
+def removeFiguresAndTables(paragraphs_):
+    figurePattern = r'(^Fi\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    figurePatternWhiteSpace = r'\s(^Fi\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    tablePattern = r'(^Ta\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    tablePatternWhiteSpace = r'\s(^Ta\w+[\.]*[\.\s]*[0-9]+):[\s]*'
+    figureDashPattern = r'(^Fi\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+    figureDashWhiteSpace = r'\s(^Fi\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+    tableDashPattern = r'(^Ta\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+    tableDashWhiteSpace = r'\s(^Ta\w+[\.]*[\.\s]*[0-9]+)-[\s]*'
+>>>>>>> Stashed changes
     to_rem = []
     emailPattern = r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
     urlPattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
@@ -131,13 +157,72 @@ def cleanData(paragraphs_):
         elif re.search(citationPattern, p):
             to_rem.append(p)
             continue
+<<<<<<< Updated upstream
         elif p.find("Fig.") != -1:
+=======
+    removeFromList(paragraphs_, to_rem)
+
+
+def removeUrls(paragraphs_):
+    egiePattern = r'(\w(?=\.))(\.(?=\w))(\w(?=\.))(\.(?=[\b\s.,!?:;]))'
+    urlPattern = r'[-a-zA-Z0-9@:%._\+~#=]{1,75}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+    to_rem = []
+    for p in paragraphs_:
+        if re.search(urlPattern, p) and not re.search(egiePattern, p):
+            to_rem.append(p)
+    removeFromList(paragraphs_, to_rem)
+
+
+def removeArxiv(paragraphs_):
+    arXivPattern = r'(ar[xX]iv):([0-9]+).([0-9]+)'
+    to_rem = []
+    for p in paragraphs_:
+        if re.search(arXivPattern, p):
+            to_rem.append(p)
+    removeFromList(paragraphs_, to_rem)
+
+
+def removeEmails(paragraphs_):
+    emailPattern = r'([A-Za-z0-9.-_]){,64}@[A-Za-z0-9]+(\.[A-Z|a-z]{2,})+'
+    to_rem = []
+    for p in paragraphs_:
+        if re.search(emailPattern, p):
+            to_rem.append(p)
+    removeFromList(paragraphs_, to_rem)
+
+
+def removeNonSpaces(paragraphs_):
+    to_rem = []
+    for p in paragraphs_:
+        if p.find(' ') == -1:
+            to_rem.append(p)
+    removeFromList(paragraphs_, to_rem)
+
+
+def removeCitations(paragraphs_):
+    citationPattern = r'(\[[0-9]{1,4}\]\s)*(([^\.\?\!]*)[\.\?\!])(\s)([0-9]{4}.)\s(\w+)'
+    to_rem = []
+    for p in paragraphs_:
+        if re.search(citationPattern, p) or p[0] == "[":
+>>>>>>> Stashed changes
             to_rem.append(p)
 
+<<<<<<< Updated upstream
     for r in to_rem:
         paragraphs_.remove(r)
     return paragraphs_
 
+=======
+def cleanData(paragraphs_):
+    stripWhitespace(paragraphs_)
+    removeNonAscii(paragraphs_)
+    removeFiguresAndTables(paragraphs_)
+    removeArxiv(paragraphs_)
+    removeCitations(paragraphs_)
+    removeShort(paragraphs_)
+    removeNonSpaces(paragraphs_)
+    removeEmails(paragraphs_)
+>>>>>>> Stashed changes
 
 
 def get_generation(prompts_):
