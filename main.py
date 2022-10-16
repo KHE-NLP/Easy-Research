@@ -47,9 +47,9 @@ class ContinueServer(BaseHTTPRequestHandler):
         elif line[:8] == "/pdflink":
             content_length = int(self.headers['Content-Length'])
             line = self.rfile.read(content_length)
-            #line = urllib.parse.parse_qs(line)
+            line = line.split(b"\r\n")[3]
             print(line)
-            text = get_paragraphs(get_pdf_text(line[b"data"][0]))
+            text = get_paragraphs(get_pdf_text(line))
             cleanData(text)
             summs = list(get_generation(text, "summary_generator"))
             titles = list(get_generation(summs, "summary_title"))
