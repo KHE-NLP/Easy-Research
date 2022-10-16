@@ -199,13 +199,12 @@ Summary:
 The time complexity of the training is linear with respect to A, which is pretty good.
 """
     responses = []
-    print(len(paragraphs))
-    for i in range(len(paragraphs)-1):		   
-        prompt = "Passage: \n {fPassage} \n\n  Summary:"		   
-        prompts = [prompt.format(fPassage=p) for p in paragraphs[i:i+1]]
-        prompts_with_prefix = [prefix + p for p in prompts]		     
-        responses.append(list(get_generation(prompts_with_prefix)))
+    print(len(paragraphs))		   
+    prompt = "Passage: \n {fPassage} \n\n  Summary:"		   
+    prompts = [prompt.format(fPassage=p) for p in paragraphs]
+    prompts_with_prefix = [prefix + p for p in prompts]		
+    responses = list(get_generation(prompts_with_prefix))
 
-    for p in responses:
-        for e in p:
-            print("SUMM:\n", e.generations[0].text)
+    for p, e in zip(prompts, responses):
+        print("REAL:\n", p)
+        print("SUMM:\n", e.generations[0].text)
